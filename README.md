@@ -7,7 +7,7 @@ UI for specialized SPAs
 Install with npm or link Hematite.js from your html:
 
 ~~~
-wget https://raw.githubusercontent.com/Densaugeo/Hematite/master/Hematite.js
+wget https://raw.githubusercontent.com/Densaugeo/Hematite/master/Hematite.pkgd.js
 
 OR
 
@@ -20,7 +20,7 @@ Supports UMD (node.js, AMD, and browser global modules).
 
 ~~~
 In your html:
-<script type="text/javascript" src="/your/folders/Hematite.js"></script>
+<script type="text/javascript" src="/your/folders/Hematite.pkgd.js"></script>
 
 Or with browserify:
 var Hematite = require('hematite');
