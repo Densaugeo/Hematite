@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+
+<title>Template</title>
+
+<link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="Hematite_light.css" id="light_colors">
+<link rel="stylesheet" href="Hematite_dark.css" id="dark_colors">
+<link rel="stylesheet" href="Hematite.css">
+
+<style type='text/css'>
+.panel {
+  position: relative;
+  top: 150px;
+  left: calc(50% - 132px);
+  width: 300px;
+  margin-bottom: 12px;
+}
+
+#help {
+  position: absolute;
+  top: 12px;
+  left: 60px;
+}
+
+.well {
+  position: absolute;
+  top: 20px;
+  left: calc(48px + 5%);
+  right: 5%;
+}
+</style>
+
+<script type="text/javascript">
+// Frame buster
+if(top !== self) {
+  top.location.replace(self.location.href);
+}
+</script>
+
+<script type="text/javascript" src="Hematite.pkgd.js"></script>
+</head>
+
+<body>
+
+<div id="background">
+</div>
+
+<div class="well">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+</div>
+
+<script type="text/javascript">
+
+///////////////
+// Utilities //
+///////////////
+
+// Daisy-chainable HTMLElement maker
+var fE = Hematite.forgeElement;
+
+// Shim for vendor-prefixed fullscreen API
+if(HTMLElement.prototype.requestFullscreen === undefined) {
+  HTMLElement.prototype.requestFullscreen = HTMLElement.prototype.msRequestFullscreen || HTMLElement.prototype.mozRequestFullScreen || HTMLElement.prototype.webkitRequestFullscreen;
+}
+if(document.exitFullscreen === undefined) {
+  document.exitFullscreen = document.msExitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen;
+}
+if(document.fullscreenElement === undefined) {
+  Object.defineProperty(document, 'fullscreenElement', {
+    get: function() {
+      return document.msFullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+    },
+  });
+}
+
+///////////////
+// Instances //
+///////////////
+
+var sidebar = new Hematite.Sidebar();
+sidebar.addButton({buttonName: 'land'    , faClass: 'fa-university', title: 'Landing page'       });
+sidebar.addButton({buttonName: 'help'    , faClass: 'fa-question'  , title: 'Help'               });
+sidebar.addButton({buttonName: 'fs'      , faClass: 'fa-arrows-alt', title: 'Fullscreen'         });
+sidebar.addButton({buttonName: 'contrast', faClass: 'fa-adjust'    , title: 'Flip Contrast'      });
+sidebar.addButton({buttonName: 'clear'   , faClass: 'fa-recycle'   , title: 'Clear local storage'});
+
+var helpPanel = new Hematite.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
+helpPanel.domElement.appendChild(fE('div', {textContent: 'But this is only a demo'}));
+
+var examplePanel = new Hematite.Panel({id: 'example', heading: 'Here is a panel'});
+examplePanel.domElement.appendChild(fE('div', {textContent: 'Stuff can go here'}));
+examplePanel.open();
+
+var darkColors = document.getElementById('dark_colors');
+
+////////////
+// Events //
+////////////
+
+sidebar.on('land', function() {
+  window.location = '/index.html';
+});
+
+sidebar.on('help', function() {
+  helpPanel.toggleOpen(true);
+});
+
+sidebar.on('fs', function() {
+  if(document.fullscreenElement === undefined) {
+    document.body.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+sidebar.on('contrast', function() {
+  if(darkColors.parentNode === document.head) {
+    document.head.removeChild(darkColors);
+    localStorage.contrast = 'light';
+  } else {
+    document.head.appendChild(darkColors);
+    localStorage.contrast = 'dark';
+  }
+});
+
+sidebar.on('clear', function() {
+  localStorage.clear();
+});
+
+////////////////////
+// Initialization //
+////////////////////
+
+if(localStorage.contrast === 'light') {
+  document.head.removeChild(darkColors);
+}
+
+</script>
+</html>

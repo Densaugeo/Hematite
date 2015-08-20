@@ -1,0 +1,44 @@
+{
+  "name": "hematite",
+  "description": "UI for specialized SPAs",
+  "version": "0.0.1",
+  "main": "Hematite.js",
+  "homepage": "https://github.com/Densaugeo/Hematite",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Densaugeo/Hematite"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "asynter": "^0.1.4",
+    "draggabilly": "^1.2.4",
+    "font-awesome": "^4.4.0"
+  },
+  "author": "Densaugeo <a@b.c> (http://www.madengineersworkshop.net/)",
+  "files": [
+    "doc",
+    "diagram-dark.jpg",
+    "diagram-light.jpg",
+    "Hematite.css",
+    "Hematite.js",
+    "Hematite.pkgd.js",
+    "Hematite_dark.js",
+    "Hematite_light.js",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
+  "bugs": "https://github.com/Densaugeo/Hematite/issues",
+  "devDependencies": {
+    "browserify": "^11.0.1",
+    "jshint": "^2.8.0",
+    "thoth-doc": "^0.0.0"
+  },
+  "scripts": {
+    "lint": "jshint *.js",
+    "doc": "thoth Hematite.js > doc/Hematite.md",
+		"build": "browserify -s Hematite Hematite.js > Hematite.pkgd.js"
+  }
+}
