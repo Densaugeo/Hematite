@@ -24,8 +24,8 @@
     "Hematite.css",
     "Hematite.js",
     "Hematite.pkgd.js",
-    "Hematite_dark.js",
-    "Hematite_light.js",
+    "Hematite-dark.js",
+    "Hematite-light.js",
     "LICENSE",
     "package.json",
     "README.md"
