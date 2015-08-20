@@ -1,7 +1,7 @@
 {
   "name": "hematite",
   "description": "UI for specialized SPAs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "Hematite.js",
   "homepage": "https://github.com/Densaugeo/Hematite",
   "repository": {
@@ -24,8 +24,8 @@
     "Hematite.css",
     "Hematite.js",
     "Hematite.pkgd.js",
-    "Hematite-dark.js",
-    "Hematite-light.js",
+    "Hematite-dark.css",
+    "Hematite-light.css",
     "LICENSE",
     "package.json",
     "README.md"
