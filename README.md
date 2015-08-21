@@ -2,19 +2,22 @@
 
 UI for specialized SPAs
 
+[![Code Climate](https://codeclimate.com/github/Densaugeo/Hematite/badges/gpa.svg)](https://codeclimate.com/github/Densaugeo/Hematite)
+
 ## Installation
 
-Install with npm or link Hematite.js from your html:
+Install with npm or link the files from your html:
 
 ~~~
 wget https://raw.githubusercontent.com/Densaugeo/Hematite/master/Hematite.pkgd.js
+...
 
 OR
 
 npm install --save https://github.com/Densaugeo/Hematite
 ~~~
 
-## Import
+## Import (JS part)
 
 Supports UMD (node.js, AMD, and browser global modules).
 
