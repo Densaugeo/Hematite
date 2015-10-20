@@ -14,7 +14,7 @@ wget https://raw.githubusercontent.com/Densaugeo/Hematite/master/Hematite.pkgd.j
 
 OR
 
-npm install --save https://github.com/Densaugeo/Hematite
+npm install --save git+https://git@github.com/Densaugeo/Hematite.git
 ~~~
 
 ## Import (JS part)
