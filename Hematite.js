@@ -25,15 +25,24 @@ Hematite.forgeElement = function forgeElement(tagName, properties, children) {
 }
 var fE = Hematite.forgeElement;
 
+// @prop Number INSTANT -- Default button type. For buttons that take effect when pressed
+Hematite.INSTANT = 0;
+
+// @prop Number TOGGLE -- Type code for buttons that toggle
+Hematite.TOGGLE = 1;
+
+// @prop Number SELECT -- Type code for buttons that require selecting a target
+Hematite.SELECT = 2;
+
 /**
  * @module Hematite.Sidebar inherits AsyNTer.Node
  * @description Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
  * @description Icons come from Font Awesome and are specified in the faClass option
  * 
  * @example var sidebar = new Hematite.Sidebar();
- * @example sidebar.addButton({buttonName: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
+ * @example sidebar.addButton({name: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
  * @example sidebar.on('do_stuff', function() {console.log('Doing stuff')});
- * @example sidebar.on('trigger', function(e) {console.log(e.buttonName === 'do_stuff')});
+ * @example sidebar.on('trigger', function(e) {console.log(e.name === 'do_stuff')});
  */
 Hematite.Sidebar = function Sidebar() {
   AsyNTer.Node.call(this);
@@ -46,6 +55,30 @@ Hematite.Sidebar = function Sidebar() {
   // @prop HTMLCollection children -- Alias for domElement.children
   this.children = this.domElement.children;
   
+  // @prop HTMLElement|null selection -- Select-type button currently selected, if any
+  var selection = null;
+  Object.defineProperty(this, 'selection', {
+    enumerable: true,
+    get: function() {
+      return selection;
+    },
+    set: function(v) {
+      if(selection) {
+        selection.classList.remove('selected');
+        self.emit('unselect', {target: selection});
+      }
+      
+      if(v instanceof HTMLElement && v.parentElement === self.domElement) {
+        selection = v;
+        selection.classList.add('selected');
+        self.emit('select', {target: selection});
+      }
+      else {
+        selection = null;
+      }
+    }
+  });
+  
   document.body.appendChild(this.domElement);
   this.domElement.title = 'Key: ' + this.domElement.accessKeyLabel;
   
@@ -55,26 +88,71 @@ Hematite.Sidebar = function Sidebar() {
   // @prop Array buttonIndicesToKeyChars -- Look up a button index and get a char for its key
   this.buttonIndicesToKeyChars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
   
-  // @method undefined addButton(Object {String faClass, String title, String buttonName}) -- Add a button. Support font-awesome icon names
-  // @event trigger {String buttonName} -- Fired when a button is triggered
-  // @event [buttonName] {} -- Fired when a button is triggered. Event name is the buttonName defined when the corresponding button was added
+  // @method undefined addButton(Object {Number type, String faClass, String faClassAlt, String textContent, String textContentAlt, String title, String name, Boolean manual}) -- Add a button. Support font-awesome icon names
+  // @event trigger {HTMLElement target} -- Fired when a button is triggered
+  // @event [name] {HTMLElement target} -- Fired when a button is triggered. Event name is the name defined when the corresponding button was added
   this.addButton = function(options) {
     options = options || {};
     
     var element = fE('i', {
+      type       : options.type || Hematite.INSTANT,
       className  : 'fa ' + 'button ' + (options.faClass || ''),
+      faClasses  : [options.faClass || '', options.faClassAlt || ''],
       textContent: options.char || '',
+      textContents: [options.char || '', options.charAlt || ''],
       title      : (options.title || 'Not yet described') + '\n\nKey: ' + self.buttonIndicesToKeyChars[self.children.length],
+      name       : options.name || 'No_name_given',
       tabIndex   : 0,
+      manual     : Boolean(options.manual),
+    });
+    
+    var state = false;
+    Object.defineProperty(element, 'state', {
+      enumerable: true,
+      get: function() {
+        return state;
+      },
+      set: function(v) {
+        state = Boolean(v);
+        
+        element.textContent = element.textContents[state + 0];
+        
+        if(element.faClasses[state + 0] !== '') {
+          element.classList.add(element.faClasses[state + 0]);
+        }
+        if(element.faClasses[!state + 0] !== '') {
+          element.classList.remove(element.faClasses[!state + 0]);
+        }
+        
+        self.emit(state ? 'toggleon' : 'toggleoff', {target: element});
+      }
     });
     
     element.addEventListener('click', function() {
-      self.domElement.focus();
-      self.emit('trigger', {buttonName: options.buttonName});
-      self.emit(options.buttonName);
+      self.emit(element.name, {target: element});
+      
+      switch(element.type) {
+        case Hematite.INSTANT:
+          self.emit('trigger', {target: element});
+          break;
+        case Hematite.TOGGLE:
+          if(!element.manual) {
+            element.state = !element.state;
+          }
+          break;
+      }
+      
+      if(element.type === Hematite.SELECT && element !== self.selection) {
+        self.selection = element;
+      }
+      else {
+        self.selection = null;
+      }
     });
     
     self.domElement.appendChild(element);
+    
+    return element;
   }
   
   document.addEventListener('keydown', function(e) {
@@ -112,7 +190,7 @@ Hematite.Panel = function Panel(options) {
   var self = this;
   
   // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
-  this.domElement = fE('div', {id: options.id, className: 'panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
+  this.domElement = fE('div', {id: options.id || '', className: 'panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
     fE('div', {className: 'panel_heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
   ]);
   

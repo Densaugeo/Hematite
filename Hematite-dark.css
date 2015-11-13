@@ -38,6 +38,9 @@ body {
 .button:focus:active {
   color: #0F0;
 }
+.button.selected {
+  color: #FF0;
+}
 
 .well {
   border: 1px solid #888;

@@ -2,6 +2,14 @@
 
 Dependencies: `AsyNTer` , `Draggabilliy` 
 
+#### Properties
+
+`Number` **INSTANT** -- Default button type. For buttons that take effect when pressed
+
+`Number` **SELECT** -- Type code for buttons that require selecting a target
+
+`Number` **TOGGLE** -- Type code for buttons that toggle
+
 #### Methods
 
 `HTMLElement` **forgeElement**`(String tagName, Object properties, Array children)` -- Daisy-chainable element maker
@@ -18,9 +26,9 @@ Icons come from Font Awesome and are specified in the faClass option
 
 ```
 var sidebar = new Hematite.Sidebar();
-sidebar.addButton({buttonName: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
+sidebar.addButton({name: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
 sidebar.on('do_stuff', function() {console.log('Doing stuff')});
-sidebar.on('trigger', function(e) {console.log(e.buttonName === 'do_stuff')});
+sidebar.on('trigger', function(e) {console.log(e.name === 'do_stuff')});
 ```
 
 #### Properties
@@ -33,15 +41,17 @@ sidebar.on('trigger', function(e) {console.log(e.buttonName === 'do_stuff')});
 
 `Object` **keyCodesToButtonIndices** -- Look up a keyCode and get a button index
 
+`HTMLElement|null` **selection** -- Select-type button currently selected, if any
+
 #### Methods
 
-`undefined` **addButton**`(Object {String faClass, String title, String buttonName})` -- Add a button. Support font-awesome icon names
+`undefined` **addButton**`(Object {Number type, String faClass, String faClassAlt, String textContent, String textContentAlt, String title, String name, Boolean manual})` -- Add a button. Support font-awesome icon names
 
 #### Events
 
-**[buttonName]** `{}` -- Fired when a button is triggered. Event name is the buttonName defined when the corresponding button was added
+**[name]** `{HTMLElement target}` -- Fired when a button is triggered. Event name is the name defined when the corresponding button was added
 
-**trigger** `{String buttonName}` -- Fired when a button is triggered
+**trigger** `{HTMLElement target}` -- Fired when a button is triggered
 
 ---
 

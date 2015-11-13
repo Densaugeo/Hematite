@@ -26,15 +26,24 @@ Hematite.forgeElement = function forgeElement(tagName, properties, children) {
 }
 var fE = Hematite.forgeElement;
 
+// @prop Number INSTANT -- Default button type. For buttons that take effect when pressed
+Hematite.INSTANT = 0;
+
+// @prop Number TOGGLE -- Type code for buttons that toggle
+Hematite.TOGGLE = 1;
+
+// @prop Number SELECT -- Type code for buttons that require selecting a target
+Hematite.SELECT = 2;
+
 /**
  * @module Hematite.Sidebar inherits AsyNTer.Node
  * @description Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
  * @description Icons come from Font Awesome and are specified in the faClass option
  * 
  * @example var sidebar = new Hematite.Sidebar();
- * @example sidebar.addButton({buttonName: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
+ * @example sidebar.addButton({name: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
  * @example sidebar.on('do_stuff', function() {console.log('Doing stuff')});
- * @example sidebar.on('trigger', function(e) {console.log(e.buttonName === 'do_stuff')});
+ * @example sidebar.on('trigger', function(e) {console.log(e.name === 'do_stuff')});
  */
 Hematite.Sidebar = function Sidebar() {
   AsyNTer.Node.call(this);
@@ -47,6 +56,30 @@ Hematite.Sidebar = function Sidebar() {
   // @prop HTMLCollection children -- Alias for domElement.children
   this.children = this.domElement.children;
   
+  // @prop HTMLElement|null selection -- Select-type button currently selected, if any
+  var selection = null;
+  Object.defineProperty(this, 'selection', {
+    enumerable: true,
+    get: function() {
+      return selection;
+    },
+    set: function(v) {
+      if(selection) {
+        selection.classList.remove('selected');
+        self.emit('unselect', {target: selection});
+      }
+      
+      if(v instanceof HTMLElement && v.parentElement === self.domElement) {
+        selection = v;
+        selection.classList.add('selected');
+        self.emit('select', {target: selection});
+      }
+      else {
+        selection = null;
+      }
+    }
+  });
+  
   document.body.appendChild(this.domElement);
   this.domElement.title = 'Key: ' + this.domElement.accessKeyLabel;
   
@@ -56,26 +89,71 @@ Hematite.Sidebar = function Sidebar() {
   // @prop Array buttonIndicesToKeyChars -- Look up a button index and get a char for its key
   this.buttonIndicesToKeyChars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
   
-  // @method undefined addButton(Object {String faClass, String title, String buttonName}) -- Add a button. Support font-awesome icon names
-  // @event trigger {String buttonName} -- Fired when a button is triggered
-  // @event [buttonName] {} -- Fired when a button is triggered. Event name is the buttonName defined when the corresponding button was added
+  // @method undefined addButton(Object {Number type, String faClass, String faClassAlt, String textContent, String textContentAlt, String title, String name, Boolean manual}) -- Add a button. Support font-awesome icon names
+  // @event trigger {HTMLElement target} -- Fired when a button is triggered
+  // @event [name] {HTMLElement target} -- Fired when a button is triggered. Event name is the name defined when the corresponding button was added
   this.addButton = function(options) {
     options = options || {};
     
     var element = fE('i', {
+      type       : options.type || Hematite.INSTANT,
       className  : 'fa ' + 'button ' + (options.faClass || ''),
+      faClasses  : [options.faClass || '', options.faClassAlt || ''],
       textContent: options.char || '',
+      textContents: [options.char || '', options.charAlt || ''],
       title      : (options.title || 'Not yet described') + '\n\nKey: ' + self.buttonIndicesToKeyChars[self.children.length],
+      name       : options.name || 'No_name_given',
       tabIndex   : 0,
+      manual     : Boolean(options.manual),
+    });
+    
+    var state = false;
+    Object.defineProperty(element, 'state', {
+      enumerable: true,
+      get: function() {
+        return state;
+      },
+      set: function(v) {
+        state = Boolean(v);
+        
+        element.textContent = element.textContents[state + 0];
+        
+        if(element.faClasses[state + 0] !== '') {
+          element.classList.add(element.faClasses[state + 0]);
+        }
+        if(element.faClasses[!state + 0] !== '') {
+          element.classList.remove(element.faClasses[!state + 0]);
+        }
+        
+        self.emit(state ? 'toggleon' : 'toggleoff', {target: element});
+      }
     });
     
     element.addEventListener('click', function() {
-      self.domElement.focus();
-      self.emit('trigger', {buttonName: options.buttonName});
-      self.emit(options.buttonName);
+      self.emit(element.name, {target: element});
+      
+      switch(element.type) {
+        case Hematite.INSTANT:
+          self.emit('trigger', {target: element});
+          break;
+        case Hematite.TOGGLE:
+          if(!element.manual) {
+            element.state = !element.state;
+          }
+          break;
+      }
+      
+      if(element.type === Hematite.SELECT && element !== self.selection) {
+        self.selection = element;
+      }
+      else {
+        self.selection = null;
+      }
     });
     
     self.domElement.appendChild(element);
+    
+    return element;
   }
   
   document.addEventListener('keydown', function(e) {
@@ -113,7 +191,7 @@ Hematite.Panel = function Panel(options) {
   var self = this;
   
   // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
-  this.domElement = fE('div', {id: options.id, className: 'panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
+  this.domElement = fE('div', {id: options.id || '', className: 'panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
     fE('div', {className: 'panel_heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
   ]);
   
@@ -2094,7 +2172,7 @@ return Unipointer;
 
 },{"eventie":7,"wolfy87-eventemitter":8}],10:[function(require,module,exports){
 /*!
- * Unidragger v1.1.3
+ * Unidragger v1.1.5
  * Draggable base class
  * MIT license
  */
@@ -2234,6 +2312,14 @@ var disableImgOndragstart = !isIE8 ? noop : function( handle ) {
  * @param {Event or Touch} pointer
  */
 Unidragger.prototype.pointerDown = function( event, pointer ) {
+  // dismiss range sliders
+  if ( event.target.nodeName == 'INPUT' && event.target.type == 'range' ) {
+    // reset pointerDown logic
+    this.isPointerDown = false;
+    delete this.pointerIdentifier;
+    return;
+  }
+
   this._dragPointerDown( event, pointer );
   // kludge to blur focused inputs in dragger
   var focused = document.activeElement;
@@ -2242,6 +2328,10 @@ Unidragger.prototype.pointerDown = function( event, pointer ) {
   }
   // bind move and end events
   this._bindPostStartEvents( event );
+  // track scrolling
+  this.pointerDownScroll = Unidragger.getScrollPosition();
+  eventie.bind( window, 'scroll', this );
+
   this.emitEvent( 'pointerDown', [ event, pointer ] );
 };
 
@@ -2312,6 +2402,10 @@ Unidragger.prototype._dragPointerUp = function( event, pointer ) {
   }
 };
 
+Unipointer.prototype.pointerDone = function() {
+  eventie.unbind( window, 'scroll', this );
+};
+
 // -------------------------- drag -------------------------- //
 
 // dragStart
@@ -2360,6 +2454,11 @@ Unidragger.prototype.dragEnd = function( event, pointer ) {
   this.emitEvent( 'dragEnd', [ event, pointer ] );
 };
 
+Unidragger.prototype.pointerDone = function() {
+  eventie.unbind( window, 'scroll', this );
+  delete this.pointerDownScroll;
+};
+
 // ----- onclick ----- //
 
 // handle all clicks and prevent clicks when dragging
@@ -2373,24 +2472,61 @@ Unidragger.prototype.onclick = function( event ) {
 
 // triggered after pointer down & up with no/tiny movement
 Unidragger.prototype._staticClick = function( event, pointer ) {
+  // ignore emulated mouse up clicks
+  if ( this.isIgnoringMouseUp && event.type == 'mouseup' ) {
+    return;
+  }
+
   // allow click in <input>s and <textarea>s
   var nodeName = event.target.nodeName;
   if ( nodeName == 'INPUT' || nodeName == 'TEXTAREA' ) {
     event.target.focus();
   }
   this.staticClick( event, pointer );
+
+  // set flag for emulated clicks 300ms after touchend
+  if ( event.type != 'mouseup' ) {
+    this.isIgnoringMouseUp = true;
+    var _this = this;
+    // reset flag after 300ms
+    setTimeout( function() {
+      delete _this.isIgnoringMouseUp;
+    }, 400 );
+  }
 };
 
 Unidragger.prototype.staticClick = function( event, pointer ) {
   this.emitEvent( 'staticClick', [ event, pointer ] );
 };
 
-// -----  ----- //
+// ----- scroll ----- //
+
+Unidragger.prototype.onscroll = function() {
+  var scroll = Unidragger.getScrollPosition();
+  var scrollMoveX = this.pointerDownScroll.x - scroll.x;
+  var scrollMoveY = this.pointerDownScroll.y - scroll.y;
+  // cancel click/tap if scroll is too much
+  if ( Math.abs( scrollMoveX ) > 3 || Math.abs( scrollMoveY ) > 3 ) {
+    this._pointerDone();
+  }
+};
+
+// ----- utils ----- //
 
 Unidragger.getPointerPoint = function( pointer ) {
   return {
     x: pointer.pageX !== undefined ? pointer.pageX : pointer.clientX,
     y: pointer.pageY !== undefined ? pointer.pageY : pointer.clientY
+  };
+};
+
+var isPageOffset = window.pageYOffset !== undefined;
+
+// get scroll in { x, y }
+Unidragger.getScrollPosition = function() {
+  return {
+    x: isPageOffset ? window.pageXOffset : document.body.scrollLeft,
+    y: isPageOffset ? window.pageYOffset : document.body.scrollTop
   };
 };
 
