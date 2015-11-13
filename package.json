@@ -34,7 +34,7 @@
   "devDependencies": {
     "browserify": "^11.0.1",
     "jshint": "^2.8.0",
-    "thoth-doc": "^0.0.0"
+    "thoth-doc": "0.0.x"
   },
   "scripts": {
     "lint": "jshint *.js",
