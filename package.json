@@ -34,11 +34,14 @@
   "devDependencies": {
     "browserify": "^11.0.1",
     "jshint": "^2.8.0",
+    "mocha": "2.x.x",
+    "selenium-webdriver": "2.x.x",
     "thoth-doc": "0.0.x"
   },
   "scripts": {
     "lint": "jshint *.js",
+    "test": "mocha test/test.js",
     "doc": "thoth Hematite.js > doc/Hematite.md",
-		"build": "browserify -s Hematite Hematite.js > Hematite.pkgd.js"
+    "build": "browserify -s Hematite Hematite.js > Hematite.pkgd.js"
   }
 }
