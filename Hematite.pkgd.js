@@ -114,6 +114,10 @@ Hematite.Sidebar = function Sidebar() {
         return state;
       },
       set: function(v) {
+        if(state === Boolean(v)) {
+          return;
+        }
+        
         state = Boolean(v);
         
         element.textContent = element.textContents[state + 0];
@@ -2172,7 +2176,7 @@ return Unipointer;
 
 },{"eventie":7,"wolfy87-eventemitter":8}],10:[function(require,module,exports){
 /*!
- * Unidragger v1.1.5
+ * Unidragger v1.1.3
  * Draggable base class
  * MIT license
  */
@@ -2312,14 +2316,6 @@ var disableImgOndragstart = !isIE8 ? noop : function( handle ) {
  * @param {Event or Touch} pointer
  */
 Unidragger.prototype.pointerDown = function( event, pointer ) {
-  // dismiss range sliders
-  if ( event.target.nodeName == 'INPUT' && event.target.type == 'range' ) {
-    // reset pointerDown logic
-    this.isPointerDown = false;
-    delete this.pointerIdentifier;
-    return;
-  }
-
   this._dragPointerDown( event, pointer );
   // kludge to blur focused inputs in dragger
   var focused = document.activeElement;
@@ -2328,10 +2324,6 @@ Unidragger.prototype.pointerDown = function( event, pointer ) {
   }
   // bind move and end events
   this._bindPostStartEvents( event );
-  // track scrolling
-  this.pointerDownScroll = Unidragger.getScrollPosition();
-  eventie.bind( window, 'scroll', this );
-
   this.emitEvent( 'pointerDown', [ event, pointer ] );
 };
 
@@ -2402,10 +2394,6 @@ Unidragger.prototype._dragPointerUp = function( event, pointer ) {
   }
 };
 
-Unipointer.prototype.pointerDone = function() {
-  eventie.unbind( window, 'scroll', this );
-};
-
 // -------------------------- drag -------------------------- //
 
 // dragStart
@@ -2454,11 +2442,6 @@ Unidragger.prototype.dragEnd = function( event, pointer ) {
   this.emitEvent( 'dragEnd', [ event, pointer ] );
 };
 
-Unidragger.prototype.pointerDone = function() {
-  eventie.unbind( window, 'scroll', this );
-  delete this.pointerDownScroll;
-};
-
 // ----- onclick ----- //
 
 // handle all clicks and prevent clicks when dragging
@@ -2472,61 +2455,24 @@ Unidragger.prototype.onclick = function( event ) {
 
 // triggered after pointer down & up with no/tiny movement
 Unidragger.prototype._staticClick = function( event, pointer ) {
-  // ignore emulated mouse up clicks
-  if ( this.isIgnoringMouseUp && event.type == 'mouseup' ) {
-    return;
-  }
-
   // allow click in <input>s and <textarea>s
   var nodeName = event.target.nodeName;
   if ( nodeName == 'INPUT' || nodeName == 'TEXTAREA' ) {
     event.target.focus();
   }
   this.staticClick( event, pointer );
-
-  // set flag for emulated clicks 300ms after touchend
-  if ( event.type != 'mouseup' ) {
-    this.isIgnoringMouseUp = true;
-    var _this = this;
-    // reset flag after 300ms
-    setTimeout( function() {
-      delete _this.isIgnoringMouseUp;
-    }, 400 );
-  }
 };
 
 Unidragger.prototype.staticClick = function( event, pointer ) {
   this.emitEvent( 'staticClick', [ event, pointer ] );
 };
 
-// ----- scroll ----- //
-
-Unidragger.prototype.onscroll = function() {
-  var scroll = Unidragger.getScrollPosition();
-  var scrollMoveX = this.pointerDownScroll.x - scroll.x;
-  var scrollMoveY = this.pointerDownScroll.y - scroll.y;
-  // cancel click/tap if scroll is too much
-  if ( Math.abs( scrollMoveX ) > 3 || Math.abs( scrollMoveY ) > 3 ) {
-    this._pointerDone();
-  }
-};
-
-// ----- utils ----- //
+// -----  ----- //
 
 Unidragger.getPointerPoint = function( pointer ) {
   return {
     x: pointer.pageX !== undefined ? pointer.pageX : pointer.clientX,
     y: pointer.pageY !== undefined ? pointer.pageY : pointer.clientY
-  };
-};
-
-var isPageOffset = window.pageYOffset !== undefined;
-
-// get scroll in { x, y }
-Unidragger.getScrollPosition = function() {
-  return {
-    x: isPageOffset ? window.pageXOffset : document.body.scrollLeft,
-    y: isPageOffset ? window.pageYOffset : document.body.scrollTop
   };
 };
 

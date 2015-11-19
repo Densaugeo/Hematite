@@ -113,6 +113,10 @@ Hematite.Sidebar = function Sidebar() {
         return state;
       },
       set: function(v) {
+        if(state === Boolean(v)) {
+          return;
+        }
+        
         state = Boolean(v);
         
         element.textContent = element.textContents[state + 0];
