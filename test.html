@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="Hematite.css">
 
 <style type='text/css'>
-.panel {
+.ht_panel {
   position: relative;
   top: 150px;
   left: calc(50% - 132px);
@@ -23,6 +23,11 @@
 #check {
   position: absolute;
   left: 100px;
+}
+
+#stray_select {
+  position: absolute;
+  left: 150px;
 }
 </style>
 
@@ -38,7 +43,7 @@ if(top !== self) {
 
 <body>
 
-<div id="background">
+<div id="ht_background">
 </div>
 
 <input type="checkbox" id="check" class="fa button fa-flask">C</input>
@@ -58,17 +63,32 @@ var fE = Hematite.forgeElement;
 // Instances //
 ///////////////
 
-var sidebar = new Hematite.Sidebar();
-sidebar.addButton({name: 'instant'  ,                        faClass: 'fa-university',                            title: 'Instant for testing'        }).id = 'instant' ;
-sidebar.addButton({name: 'toggle_1' , type: Hematite.TOGGLE, faClass: 'fa-flask'     , faClassAlt: 'fa-fire'    , title: 'Toggle for testing'         }).id = 'toggle_1';
-sidebar.addButton({name: 'toggle_2' , type: Hematite.TOGGLE, char   : 'T'            , charAlt   : 'U'          , title: 'This toggle uses char icons'}).id = 'toggle_2';
-sidebar.addButton({name: 'toggle_m1', type: Hematite.TOGGLE, faClass: 'fa-flask'     , faClassAlt: 'fa-fire'    , title: 'This toggle is not auto'    , manual: true}).id = 'toggle_m1';
-sidebar.addButton({name: 'toggle_m2', type: Hematite.TOGGLE, char   : 'V'            , charAlt   : 'W'          , title: 'This toggle is not auto'    , manual: true}).id = 'toggle_m2';
-sidebar.addButton({name: 'select_1' , type: Hematite.SELECT, char   : '4'            ,                            title: 'For testing selects'        }).id = 'select_1';
-sidebar.addButton({name: 'select_2' , type: Hematite.SELECT, char   : '5'            ,                            title: 'For testing selects'        }).id = 'select_2';
-sidebar.addButton({name: 'select_3' , type: Hematite.SELECT, char   : '6'            ,                            title: 'For testing selects'        }).id = 'select_3';
-sidebar.addButton({name: 'contrast' , type: Hematite.TOGGLE, faClass: 'fa-adjust'    , faClassAlt: 'fa-circle-o', title: 'Flip contrast'              }).id = 'contrast';
-sidebar.addButton({name: 'clear'    ,                        faClass: 'fa-recycle'   ,                            title: 'Clear local storage'        }).id = 'clear'   ;
+var sidebar = fE('ht-sidebar', {}, [
+  fE('ht-instant', {id: 'instant'  , faClass    : 'fa-university',                            description: 'Instant for testing'}),
+  fE('ht-toggle' , {id: 'toggle_1' , faClass    : 'fa-flask'     , faClassAlt: 'fa-fire'    , description: 'Toggle for testing'}),
+  fE('ht-toggle' , {id: 'toggle_2' , text       : 'T'            , textAlt   : 'U'          , description: 'This toggle uses char icons'}),
+  fE('ht-toggle' , {id: 'toggle_m1', faClass    : 'fa-flask'     , faClassAlt: 'fa-fire'    , description: 'This toggle is not auto', manual: true}),
+  fE('ht-toggle' , {id: 'toggle_m2', text       : 'V'            , textAlt   : 'W'          , description: 'This toggle is not auto', manual: true}),
+  fE('ht-select' , {id: 'select_1' , textContent: '4'            ,                            description: 'For testing selects'}),
+  fE('ht-select' , {id: 'select_2' , textContent: '5'            ,                            description: 'For testing selects'}),
+  fE('ht-select' , {id: 'select_3' , textContent: '6'            ,                            description: 'For testing selects'}),
+  
+  contrastButton =
+  fE('ht-toggle' , {id: 'contrast' , faClass    : 'fa-adjust'    , faClassAlt: 'fa-circle-o', description: 'Flip contrast'}),
+  
+  clearButton =
+  fE('ht-instant', {id: 'clear'    , faClass    : 'fa-recycle'   ,                            description: 'Clear local storage'}),
+  
+  fE('ht-instant', {id: 'filler_1' , faClass    : 'fa-sun-o'     ,                            description: 'Filling past the keycut slots'}),
+  fE('ht-instant', {id: 'filler_2' , faClass    : 'fa-gear'}),
+  fE('ht-instant', {id: 'filler_3' , faClass    : 'fa-gears'     ,                            description: 'Filling past the keycut slots'}),
+]);
+
+document.body.appendChild(sidebar);
+
+document.body.appendChild(fE('ht-select', {
+  id: 'stray_select', faClass: 'fa-space-shuttle', description: 'A select button by itself'
+}));
 
 var examplePanel = new Hematite.Panel({id: 'panel_test', heading: 'Here is a panel', closeButton: true});
 examplePanel.domElement.appendChild(fE('div', {textContent: 'Stuff can go here'}));
@@ -81,6 +101,8 @@ var darkColors = document.getElementById('dark_colors');
 ////////////
 
 var records = {
+  lastClick: '',
+  clickCount: 0,
   lastTrigger: '',
   triggerCount: 0,
   lastToggleon: '',
@@ -90,54 +112,52 @@ var records = {
   lastSelect: '',
   selectCount: 0,
   lastUnselect: '',
-  unselectCount: 0,
-  lastName: '',
-  nameCount: 0,
+  unselectCount: 0
 }
 
-sidebar.on('trigger', function(e) {
-  records.lastTrigger = e.target.name;
+Array.forEach(sidebar.children, function(v) {
+  v.addEventListener('click', function(e) {
+    records.lastClick = e.target.id;
+    ++records.clickCount;
+  });
+});
+
+sidebar.addEventListener('trigger', function(e) {
+  records.lastTrigger = e.target.id;
   ++records.triggerCount;
 });
 
-sidebar.on('toggleon', function(e) {
-  records.lastToggleon = e.target.name;
+sidebar.addEventListener('toggleon', function(e) {
+  records.lastToggleon = e.target.id;
   ++records.toggleonCount;
 });
 
-sidebar.on('toggleoff', function(e) {
-  records.lastToggleoff = e.target.name;
+sidebar.addEventListener('toggleoff', function(e) {
+  records.lastToggleoff = e.target.id;
   ++records.toggleoffCount;
 });
 
-sidebar.on('select', function(e) {
-  records.lastSelect = e.target.name;
+sidebar.addEventListener('select', function(e) {
+  records.lastSelect = e.target.id;
   ++records.selectCount;
 });
 
-sidebar.on('unselect', function(e) {
-  records.lastUnselect = e.target.name;
+sidebar.addEventListener('unselect', function(e) {
+  records.lastUnselect = e.target.id;
   ++records.unselectCount;
 });
 
-for(var i = 0; i < sidebar.domElement.children.length; ++i) {
-  sidebar.on(sidebar.domElement.children[i].name, function(e) {
-    records.lastName = e.target.name;
-    ++records.nameCount;
-  });
-}
-
-sidebar.on('contrast', function(e) {
-  if(e.target.state) {
-    document.head.removeChild(darkColors);
-    localStorage.contrast = 'light';
-  } else {
-    document.head.appendChild(darkColors);
-    localStorage.contrast = 'dark';
-  }
+contrastButton.addEventListener('toggleon', function() {
+  document.head.removeChild(darkColors);
+  localStorage.contrast = 'light';
 });
 
-sidebar.on('clear', function() {
+contrastButton.addEventListener('toggleoff', function() {
+  document.head.appendChild(darkColors);
+  localStorage.contrast = 'dark';
+});
+
+clearButton.addEventListener('trigger', function() {
   localStorage.clear();
 });
 

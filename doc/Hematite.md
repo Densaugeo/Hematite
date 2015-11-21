@@ -1,57 +1,155 @@
 # Hematite.js
 
-Dependencies: `AsyNTer` , `Draggabilliy` 
-
-#### Properties
-
-`Number` **INSTANT** -- Default button type. For buttons that take effect when pressed
-
-`Number` **SELECT** -- Type code for buttons that require selecting a target
-
-`Number` **TOGGLE** -- Type code for buttons that toggle
+Dependencies: `Draggabilliy` 
 
 #### Methods
 
-`HTMLElement` **forgeElement**`(String tagName, Object properties, Array children)` -- Daisy-chainable element maker
+`HTMLElement` **createElement**`(String tagName)` -- Extension of document.createElement for creating ht- elements
+
+`HTMLElement` **forgeElement**`(String tagName, Object properties, [HTMLElement] children)` -- Daisy-chainable element maker
 
 ---
 
-## Hematite.Sidebar
+## \<ht-button\>
 
-Inherits: `AsyNTer.Node`
+Inherits: `HTMLUnknownElement`
 
-Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
+Not an instantiable element. Only for other ht- elements to inherit from
 
-Icons come from Font Awesome and are specified in the faClass option
+Icons may be specified as either plain text or font-awesome text icon names
+
+#### Properties
+
+`String` **className** -- Defaults to 'fa button'
+
+`String` **description** -- Setting .description automatically sets .title
+
+`String` **faClass** -- Name of font-awesome class for an icon
+
+`Number` **tabIndex** -- Defaults to 0, to allow tab navigation
+
+`String` **title** -- Automatically set to [keycut from <ht-sidebar>] + ['\n\n'] + [.description]
+
+---
+
+## \<ht-instant\>
+
+Inherits: `<ht-button>`
+
+Instant buttons are simple buttons - click them and they fire events
 
 ```
-var sidebar = new Hematite.Sidebar();
-sidebar.addButton({name: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
-sidebar.on('do_stuff', function() {console.log('Doing stuff')});
-sidebar.on('trigger', function(e) {console.log(e.name === 'do_stuff')});
+var instant = Hematite.createElement('ht-instant');
+instant.faClass = 'fa-gear';
+instant.addEventListener('trigger', function() {console.log('Triggered!')});
+document.body.appendChild(instant);
+```
+
+#### Events
+
+**trigger** `{Event}` -- Fired when an <ht-instant> is clicked
+
+---
+
+## \<ht-toggle\>
+
+Inherits: `<ht-button>`
+
+Toggle buttons can automatically toggle their icons and fire toggleon/off events
+
+```
+var toggle = Hematite.createElement('ht-toggle');
+toggle.faClass = 'fa-bolt';
+toggle.faClassAlt = 'fa-fire';
+toggle.addEventListener('toggleon', function() {console.log('Is now on')});
+toggle.addEventListener('toggleoff', function() {console.log('Is now off')});
+document.body.appendChild(toggle);
 ```
 
 #### Properties
 
-`Array` **buttonIndicesToKeyChars** -- Look up a button index and get a char for its key
+`String` **faClassAlt** -- Sets alternative of .faClass to be used while button is toggled on
 
-`HTMLCollection` **children** -- Alias for domElement.children
+`Boolean` **manual** -- If set to true, button will not change state when clicked, only when .state is explicitly set
 
-`HTMLElement` **domElement** -- div tag that holds all of the Panel's HTML elements
+`Boolean` **state** -- Toggle state. Assigned values to .state will toggle button normally
 
-`Object` **keyCodesToButtonIndices** -- Look up a keyCode and get a button index
+`String` **text** -- Value assigned to .textContent when button is toggled off
 
-`HTMLElement|null` **selection** -- Select-type button currently selected, if any
+`String` **textAlt** -- Value assigned to .textContent when button is toggled on
 
-#### Methods
-
-`undefined` **addButton**`(Object {Number type, String faClass, String faClassAlt, String textContent, String textContentAlt, String title, String name, Boolean manual})` -- Add a button. Support font-awesome icon names
+`String` **textContent** -- Overwritten by .text and .textAlt when toggled
 
 #### Events
 
-**[name]** `{HTMLElement target}` -- Fired when a button is triggered. Event name is the name defined when the corresponding button was added
+**toggleoff** `{Event}` -- Fired when an <ht-toggle> is toggled off
 
-**trigger** `{HTMLElement target}` -- Fired when a button is triggered
+**toggleon** `{Event}` -- Fired when an <ht-toggle> is toggled on
+
+---
+
+## \<ht-select\>
+
+Inherits: `<ht-button>`
+
+Select buttons automaticlly highlight and set .selection on an <ht-sidebar> they are appended to
+
+```
+var select1 = Hematite.createElement('ht-select');
+select1.faClass = 'fa-gear';
+select1.addEventListener('select', function() {console.log('1 is selected')});
+
+var select2 = Hematite.createElement('ht-select');
+select2.faClass = 'fa-gears';
+select2.addEventListener('select', function() {console.log('Now 2 is selected')});
+
+var sidebar = Hematite.createElement('ht-sidebar');
+sidebar.appendChild(select1);
+sidebar.appendChild(select2);
+document.body.appendChild(sidebar);
+```
+
+#### Events
+
+**select** `{Event}` -- Fired when an <ht-select> is selected
+
+**unselect** `{Event}` -- Fired when an <ht-select> is unselected
+
+---
+
+## \<ht-sidebar\>
+
+Inherits: `HTMLUnknownElement`
+
+Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
+
+```
+var toggle = Hematite.createElement('ht-toggle');
+toggle.faClass = 'fa-flask';
+toggle.faClassAlt = 'fa-fire';
+toggle.title = 'Tooltip text';
+toggle.addEventListener('toggleoff', function() {console.log('Toggled off!')});
+
+var sidebar = Hematite.createElement('ht-sidebar');
+sidebar.addEventListener('toggleon', function(e) {if(e.target === toggle) console.log('Toggle on!')});
+
+sidebar.appendChild(toggle);
+document.body.appendChild(sidebar);
+```
+
+#### Properties
+
+`String` **accessKey** -- Defaults to '1'
+
+`String` **id** -- Defaults to 'sidebar'
+
+`[Number]` **keyCuts** -- .charCodeAt()s for each keycut. (Mostly) work with KeyboardEvent.keycode
+
+`HTMLElement|null` **selection** -- <ht-select> currently selected, if any. Setting .selection will update highlights and fire un/select
+
+`Number` **tabIndex** -- Defaults to 1, to allow tab navigation
+
+`String` **title** -- Defaults to 'Key: ' + .accessKeyLabel
 
 ---
 

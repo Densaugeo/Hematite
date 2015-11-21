@@ -17,23 +17,32 @@ var checkRecords = function(test) {
 var Hematite = {};
 
 var expectedButtons = [
-  {name: 'instant'  ,                        faClass: 'fa-university',                            title: 'Instant for testing'        },
-  {name: 'toggle_1' , type: Hematite.TOGGLE, faClass: 'fa-flask'     , faClassAlt: 'fa-fire'    , title: 'Toggle for testing'         },
-  {name: 'toggle_2' , type: Hematite.TOGGLE, char   : 'T'            , charAlt   : 'U'          , title: 'This toggle uses char icons'},
-  {name: 'toggle_m1', type: Hematite.TOGGLE, faClass: 'fa-flask'     , faClassAlt: 'fa-fire'    , title: 'This toggle is not auto'    , manual: true},
-  {name: 'toggle_m2', type: Hematite.TOGGLE, char   : 'V'            , charAlt   : 'W'          , title: 'This toggle is not auto'    , manual: true},
-  {name: 'select_1' , type: Hematite.SELECT, char   : '4'            ,                            title: 'For testing selects'        },
-  {name: 'select_2' , type: Hematite.SELECT, char   : '5'            ,                            title: 'For testing selects'        },
-  {name: 'select_3' , type: Hematite.SELECT, char   : '6'            ,                            title: 'For testing selects'        },
-  {name: 'contrast' , type: Hematite.TOGGLE, faClass: 'fa-adjust'    , faClassAlt: 'fa-circle-o', title: 'Flip contrast'              },
-  {name: 'clear'    ,                        faClass: 'fa-recycle'   ,                            title: 'Clear local storage'        },
+  {id: 'instant'  , faClass    : 'fa-university',                            description: 'Instant for testing'},
+  {id: 'toggle_1' , faClass    : 'fa-flask'     , faClassAlt: 'fa-fire'    , description: 'Toggle for testing'},
+  {id: 'toggle_2' , text       : 'T'            , textAlt   : 'U'          , description: 'This toggle uses char icons'},
+  {id: 'toggle_m1', faClass    : 'fa-flask'     , faClassAlt: 'fa-fire'    , description: 'This toggle is not auto', manual: true},
+  {id: 'toggle_m2', text       : 'V'            , textAlt   : 'W'          , description: 'This toggle is not auto', manual: true},
+  {id: 'select_1' , textContent: '4'            ,                            description: 'For testing selects'},
+  {id: 'select_2' , textContent: '5'            ,                            description: 'For testing selects'},
+  {id: 'select_3' , textContent: '6'            ,                            description: 'For testing selects'},
+  {id: 'contrast' , faClass    : 'fa-adjust'    , faClassAlt: 'fa-circle-o', description: 'Flip contrast'},
+  {id: 'clear'    , faClass    : 'fa-recycle'   ,                            description: 'Clear local storage'},
+  {id: 'filler_1' , faClass    : 'fa-sun-o'     ,                            description: 'Filling past the keycut slots'},
+  {id: 'filler_2' , faClass    : 'fa-gear'},
+  {id: 'filler_3' , faClass    : 'fa-gears'     ,                            description: 'Filling past the keycut slots'}
 ];
 
 expectedButtons.forEach(function(v) {
-  v.id = v.name;
+  if(v.text) {
+    v.textContent = v.text;
+  }
 });
 
-suite('Hematite.Button elements', function() {
+var defaultClassName = 'ht_button fa';
+
+var sidebarDefaultKeycuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+
+suite('<ht-button> elements', function() {
   suiteSetup(function(done) {
     this.timeout(10000);
     
@@ -43,7 +52,7 @@ suite('Hematite.Button elements', function() {
   });
   
   expectedButtons.forEach(function(v) {
-    test('Button "' + v.name + '" is visible', function(done) {
+    test('Button "' + v.id + '" is visible', function(done) {
       driver.findElement(By.id(v.id)).isDisplayed().then(function(res) {
         assert.strictEqual(res, true);
         done();
@@ -52,7 +61,7 @@ suite('Hematite.Button elements', function() {
   });
   
   expectedButtons.forEach(function(v, i) {
-    test('Button "' + v.name + '" is the correct location', function(done) {
+    test('Button "' + v.id + '" is the correct location', function(done) {
       driver.findElement(By.id(v.id)).getLocation().then(function(res) {
         assert.strictEqual(res.x, 12);
         assert.strictEqual(res.y, 12 + 36*i);
@@ -64,25 +73,42 @@ suite('Hematite.Button elements', function() {
   });
   
   expectedButtons.forEach(function(v) {
-    test('Button "' + v.name + '" has the correct CSS classes', function(done) {
+    test('Button "' + v.id + '" has the correct CSS classes', function(done) {
       driver.findElement(By.id(v.id)).getAttribute('className').then(function(res) {
-        assert.strictEqual(res.trim(), ('fa button ' + (v.faClass || '')).trim());
+        assert.strictEqual(res.trim(), defaultClassName + (v.faClass ? ' ' + v.faClass : ''));
         done();
       });
     });
   });
   
   expectedButtons.forEach(function(v) {
-    test('Button "' + v.name + '" has the correct .textContent', function(done) {
+    test('Button "' + v.id + '" has the correct .textContent', function(done) {
       driver.findElement(By.id(v.id)).getInnerHtml().then(function(res){
-        assert.strictEqual(res, v.char || '');
+        assert.strictEqual(res, v.textContent || '');
         done();
       });
     });
   });
+  
+  expectedButtons.forEach(function(v, i) {
+    test('Button "' + v.id + '" has the correct .title', function(done) {
+      driver.findElement(By.id(v.id)).getAttribute('title').then(function(res){
+        var key = sidebarDefaultKeycuts[i];
+        assert.strictEqual(res, (v.description || '') + (v.description && key ? '\n\n' : '') + (key ? 'Key: ' + key : ''));
+        done();
+      });
+    });
+  });
+  
+  test('Stray button has the correct title', function(done) {
+    driver.findElement(By.id('stray_select')).getAttribute('title').then(function(res){
+      assert.strictEqual(res, 'A select button by itself');
+      done();
+    });
+  });
 });
 
-suite('Hematite.Button interaction', function() {
+suite('<ht-button> interaction', function() {
   setup(function(done) {
     driver.get(testURL).then(function() {
       done();
@@ -90,19 +116,20 @@ suite('Hematite.Button interaction', function() {
   });
   
   expectedButtons.forEach(function(v) {
-    test('Button "' + v.name + '" fires its named event', function(done) {
-      driver.findElement(By.id(v.id)).click();
+    test('Setting .faClass on button "' + v.id + '" changes .className correctly', function(done) {
+      driver.executeScript(function(id) {
+        document.querySelector('#' + id).faClass = 'fa-fire';
+      }, v.id);
       
-      checkRecords(function(records) {
-        assert.strictEqual(records.lastName, v.name);
-        assert.strictEqual(records.nameCount, 1);
+      driver.findElement(By.id(v.id)).getAttribute('className').then(function(res) {
+        assert.strictEqual(res.trim(), (defaultClassName + ' fa-fire'));
         done();
       });
     });
   });
 });
 
-suite('Hematite.InstantButton interaction', function() {
+suite('<ht-instant> interaction', function() {
   setup(function(done) {
     driver.get(testURL).then(function() {
       done();
@@ -142,7 +169,7 @@ suite('Hematite.InstantButton interaction', function() {
   });
 });
 
-suite('Hematite.ToggleButton interaction', function() {
+suite('<ht-toggle> interaction', function() {
   setup(function(done) {
     driver.get(testURL).then(function() {
       done();
@@ -209,7 +236,7 @@ suite('Hematite.ToggleButton interaction', function() {
     driver.findElement(By.id('toggle_1')).click();
     
     driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button fa-fire');
+      assert.strictEqual(res, defaultClassName + ' fa-fire');
       done();
     });
   });
@@ -219,7 +246,7 @@ suite('Hematite.ToggleButton interaction', function() {
     driver.findElement(By.id('toggle_1')).click();
     
     driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button fa-flask');
+      assert.strictEqual(res, defaultClassName + ' fa-flask');
       done();
     });
   });
@@ -228,12 +255,12 @@ suite('Hematite.ToggleButton interaction', function() {
     driver.findElement(By.id('toggle_m1')).click();
     
     driver.findElement(By.id('toggle_m1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button fa-flask');
+      assert.strictEqual(res, defaultClassName + ' fa-flask');
       done();
     });
   });
   
-  test('Toggling button on changes char icon', function(done) {
+  test('Toggling button on changes .textContent', function(done) {
     driver.findElement(By.id('toggle_2')).click();
     
     driver.findElement(By.id('toggle_2')).getAttribute('textContent').then(function(res) {
@@ -242,7 +269,7 @@ suite('Hematite.ToggleButton interaction', function() {
     });
   });
   
-  test('Toggling button off changes char icon back', function(done) {
+  test('Toggling button off changes .textContent back', function(done) {
     driver.findElement(By.id('toggle_2')).click();
     driver.findElement(By.id('toggle_2')).click();
     
@@ -252,7 +279,7 @@ suite('Hematite.ToggleButton interaction', function() {
     });
   });
   
-  test('Toggling button with .manual === true does not change char icon', function(done) {
+  test('Toggling button with .manual === true does not change .textContent', function(done) {
     driver.findElement(By.id('toggle_m2')).click();
     
     driver.findElement(By.id('toggle_m2')).getAttribute('textContent').then(function(res) {
@@ -359,18 +386,6 @@ suite('Hematite.ToggleButton interaction', function() {
     });
   });
   
-  test('Setting .state does not fire name events', function(done) {
-    driver.executeScript(function() {
-      document.getElementById('toggle_1').state = true;
-      document.getElementById('toggle_1').state = false;
-    });
-    
-    checkRecords(function(records) {
-      assert.strictEqual(records.nameCount, 0);
-      done();
-    });
-  });
-  
   test('Setting .state does not fire trigger', function(done) {
     driver.executeScript(function() {
       document.getElementById('toggle_1').state = true;
@@ -402,7 +417,7 @@ suite('Hematite.ToggleButton interaction', function() {
     });
     
     driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res.trim(), ('fa button fa-fire'));
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-fire');
       done();
     });
   });
@@ -414,12 +429,12 @@ suite('Hematite.ToggleButton interaction', function() {
     });
     
     driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res.trim(), ('fa button fa-flask'));
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-flask');
       done();
     });
   });
   
-  test('Setting .state from false to true changes char icon', function(done) {
+  test('Setting .state from false to true changes .textContent', function(done) {
     driver.executeScript(function() {
       document.getElementById('toggle_2').state = true;
     });
@@ -430,7 +445,7 @@ suite('Hematite.ToggleButton interaction', function() {
     });
   });
   
-  test('Setting .state from true to false changes char icon back', function(done) {
+  test('Setting .state from true to false changes .textContent back', function(done) {
     driver.executeScript(function() {
       document.getElementById('toggle_2').state = true;
       document.getElementById('toggle_2').state = false;
@@ -441,9 +456,201 @@ suite('Hematite.ToggleButton interaction', function() {
       done();
     });
   });
+  
+  test('After changing .faClass, .className toggles correctly', function(done) {
+    driver.executeScript(function() {
+      document.querySelector('#toggle_1').faClass = 'fa-bolt';
+    });
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-bolt');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-fire');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-bolt');
+      done();
+    });
+  });
+  
+  test('After changing .faClassAlt, .className toggles correctly', function(done) {
+    driver.executeScript(function() {
+      document.querySelector('#toggle_1').faClassAlt = 'fa-bolt';
+    });
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-flask');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-bolt');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-flask');
+      done();
+    });
+  });
+  
+  test('After changing .faClass while button is active, .className toggles correctly', function(done) {
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.executeScript(function() {
+      document.querySelector('#toggle_1').faClass = 'fa-bolt';
+    });
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-fire');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-bolt');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-fire');
+      done();
+    });
+  });
+  
+  test('After changing .faClassAlt while button is active, .className toggles correctly', function(done) {
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.executeScript(function() {
+      document.querySelector('#toggle_1').faClassAlt = 'fa-bolt';
+    });
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-bolt');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-flask');
+    });
+    
+    driver.findElement(By.id('toggle_1')).click();
+    
+    driver.findElement(By.id('toggle_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res.trim(), defaultClassName + ' fa-bolt');
+      done();
+    });
+  });
+  
+  test('After changing .text, .textContent toggles correctly', function(done) {
+    driver.executeScript(function() {
+      document.querySelector('#toggle_2').text = 'X';
+    });
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'X');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'U');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'X');
+      done();
+    });
+  });
+  
+  test('After changing .textAlt, .textContent toggles correctly', function(done) {
+    driver.executeScript(function() {
+      document.querySelector('#toggle_2').textAlt = 'X';
+    });
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'T');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'X');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'T');
+      done();
+    });
+  });
+  
+  test('After changing .text while button is active, .textContent toggles correctly', function(done) {
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.executeScript(function() {
+      document.querySelector('#toggle_2').text = 'X';
+    });
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'U');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'X');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'U');
+      done();
+    });
+  });
+  
+  test('After changing .textAlt while button is active, .textContent toggles correctly', function(done) {
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.executeScript(function() {
+      document.querySelector('#toggle_2').textAlt = 'X';
+    });
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'X');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'T');
+    });
+    
+    driver.findElement(By.id('toggle_2')).click();
+    
+    driver.findElement(By.id('toggle_2')).getInnerHtml().then(function(res) {
+      assert.strictEqual(res, 'X');
+      done();
+    });
+  });
 });
 
-suite('Hematite.SelectButton interaction', function() {
+suite('<ht-select> interaction', function() {
   setup(function(done) {
     driver.get(testURL).then(function() {
       done();
@@ -504,7 +711,16 @@ suite('Hematite.SelectButton interaction', function() {
     driver.findElement(By.id('select_1')).click();
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button selected');
+      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      done();
+    });
+  });
+  
+  test('When a stray button is selected, it is not highlighted', function(done) {
+    driver.findElement(By.id('stray_select')).click();
+    
+    driver.findElement(By.id('stray_select')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res, defaultClassName + ' fa-space-shuttle');
       done();
     });
   });
@@ -514,7 +730,21 @@ suite('Hematite.SelectButton interaction', function() {
     driver.findElement(By.id('select_2')).click();
     
     driver.findElement(By.id('select_2')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button selected');
+      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      done();
+    });
+  });
+  
+  test('Selecting one button and then a stray leaves highlight on first button', function(done) {
+    driver.findElement(By.id('select_1')).click();
+    driver.findElement(By.id('stray_select')).click();
+    
+    driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res, defaultClassName + ' ht_selected');
+    });
+    
+    driver.findElement(By.id('stray_select')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res, defaultClassName + ' fa-space-shuttle');
       done();
     });
   });
@@ -524,7 +754,7 @@ suite('Hematite.SelectButton interaction', function() {
     driver.findElement(By.id('select_2')).click();
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res.trim(), 'fa button');
+      assert.strictEqual(res.trim(), defaultClassName);
       done();
     });
   });
@@ -534,7 +764,7 @@ suite('Hematite.SelectButton interaction', function() {
     driver.findElement(By.id('select_1')).click();
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res.trim(), 'fa button');
+      assert.strictEqual(res.trim(), defaultClassName);
       done();
     });
   });
@@ -552,7 +782,7 @@ suite('Hematite.SelectButton interaction', function() {
     driver.findElement(By.id('select_1')).click();
     
     driver.executeScript(function() {
-      return sidebar.selection.name;
+      return sidebar.selection.id;
     }).then(function(res) {
       assert.strictEqual(res, 'select_1');
       done();
@@ -564,7 +794,7 @@ suite('Hematite.SelectButton interaction', function() {
     driver.findElement(By.id('select_2')).click();
     
     driver.executeScript(function() {
-      return sidebar.selection.name;
+      return sidebar.selection.id;
     }).then(function(res) {
       assert.strictEqual(res, 'select_2');
       done();
@@ -583,7 +813,7 @@ suite('Hematite.SelectButton interaction', function() {
     });
   });
   
-  test('Setting .selection from null to a button fires select (not unselect)', function(done) {
+  test('Setting .selection from null to an <ht-select> fires select (not unselect)', function(done) {
     driver.executeScript(function() {
       sidebar.selection = document.getElementById('select_1');
     });
@@ -596,9 +826,22 @@ suite('Hematite.SelectButton interaction', function() {
     });
   });
   
-  test('Setting .selection to an invalid value results in .select === null', function(done) {
+  test('Setting .selection to its current value does not fire un/select', function(done) {
     driver.executeScript(function() {
-      sidebar.selection = document.body;
+      sidebar.selection = document.querySelector('#select_1');
+      sidebar.selection = sidebar.selection;
+    });
+    
+    checkRecords(function(records) {
+      assert.strictEqual(records.selectCount, 1);
+      assert.strictEqual(records.unselectCount, 0);
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection to an invalid HTMLElement sets it to null', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = 'foo';
       return sidebar.selection;
     }).then(function(res) {
       assert.strictEqual(res, null);
@@ -606,9 +849,63 @@ suite('Hematite.SelectButton interaction', function() {
     });
   });
   
-  test('Setting .selection from null to an invalid value does not fire un/select', function(done) {
+  test('Attempting to set .selection to an <ht-instant> sets it to null', function(done) {
     driver.executeScript(function() {
-      sidebar.selection = document.body;
+      sidebar.selection = document.querySelector('#instant');
+      return sidebar.selection;
+    }).then(function(res) {
+      assert.strictEqual(res, null);
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection to an <ht-toggle> sets it to null', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = document.querySelector('#toggle_1');
+      return sidebar.selection;
+    }).then(function(res) {
+      assert.strictEqual(res, null);
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection to an <ht-select> that is not its child sets it to null', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = document.querySelector('#stray_select');
+      return sidebar.selection;
+    }).then(function(res) {
+      assert.strictEqual(res, null);
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection from null to an invalid HTMLElement does not fire un/select', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = 'foo';
+    });
+    
+    checkRecords(function(records) {
+      assert.strictEqual(records.selectCount, 0);
+      assert.strictEqual(records.unselectCount, 0);
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection from null to an <ht-instant> does not fire un/select', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = document.querySelector('#instant');
+    });
+    
+    checkRecords(function(records) {
+      assert.strictEqual(records.selectCount, 0);
+      assert.strictEqual(records.unselectCount, 0);
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection from null to an <ht-select> that is not its child does not fire un/select', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = document.querySelector('#stray_select');
     });
     
     checkRecords(function(records) {
@@ -675,17 +972,6 @@ suite('Hematite.SelectButton interaction', function() {
     });
   });
   
-  test('Setting .selection does not fire name events', function(done) {
-    driver.executeScript(function() {
-      sidebar.selection = document.getElementById('select_1');
-    });
-    
-    checkRecords(function(records) {
-      assert.strictEqual(records.nameCount, 0);
-      done();
-    });
-  });
-  
   test('Setting .selection does not fire trigger events', function(done) {
     driver.executeScript(function() {
       sidebar.selection = document.getElementById('select_1');
@@ -715,7 +1001,18 @@ suite('Hematite.SelectButton interaction', function() {
     });
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button selected');
+      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      done();
+    });
+  });
+  
+  test('Attempting to set .selection to an <ht-instant> does not add highlight', function(done) {
+    driver.executeScript(function() {
+      sidebar.selection = document.getElementById('instant');
+    });
+    
+    driver.findElement(By.id('instant')).getAttribute('className').then(function(res) {
+      assert.strictEqual(res, defaultClassName + ' fa-university');
       done();
     });
   });
@@ -727,7 +1024,7 @@ suite('Hematite.SelectButton interaction', function() {
     });
     
     driver.findElement(By.id('select_2')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'fa button selected');
+      assert.strictEqual(res, defaultClassName + ' ht_selected');
       done();
     });
   });
@@ -739,7 +1036,7 @@ suite('Hematite.SelectButton interaction', function() {
     });
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res.trim(), 'fa button');
+      assert.strictEqual(res.trim(), defaultClassName);
       done();
     });
   });
@@ -751,14 +1048,32 @@ suite('Hematite.SelectButton interaction', function() {
     });
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res.trim(), 'fa button');
+      assert.strictEqual(res.trim(), defaultClassName);
       done();
     });
   });
 });
 
-suite('Hematite.Sidebar', function() {
-  test('Hotkeys?');
+suite('<ht-sidebar>', function() {
+  setup(function(done) {
+    driver.get(testURL).then(function() {
+      done();
+    });
+  });
+  
+  expectedButtons.forEach(function(v, i) {
+    if(sidebarDefaultKeycuts[i]) {
+      test('Keyboard shortcut "' + sidebarDefaultKeycuts[i] + '" activates button on <ht-sidebar>', function(done) {
+        driver.findElement(By.tagName('body')).sendKeys(sidebarDefaultKeycuts[i]);
+        
+        checkRecords(function(records) {
+          assert.strictEqual(records.lastClick, v.id);
+          assert.strictEqual(records.clickCount, 1);
+          done();
+        });
+      });
+    }
+  });
 });
 
 suite('Hematite.Panel', function() {
@@ -771,7 +1086,7 @@ suite('Hematite.Panel', function() {
   
   test('Panel has correct CSS classes', function(done) {
     driver.findElement(By.id('panel_test')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'panel');
+      assert.strictEqual(res, 'ht_panel');
       done();
     });
   });

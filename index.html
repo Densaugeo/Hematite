@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="Hematite.css">
 
 <style type='text/css'>
-.panel {
+.ht_panel {
   position: relative;
   top: 150px;
   left: calc(50% - 132px);
@@ -26,7 +26,7 @@
   left: 60px;
 }
 
-.well {
+.ht_well {
   position: absolute;
   top: 20px;
   left: calc(48px + 5%);
@@ -46,10 +46,10 @@ if(top !== self) {
 
 <body>
 
-<div id="background">
+<div id="ht_background">
 </div>
 
-<div class="well">
+<div class="ht_well">
   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 </div>
 
@@ -81,16 +81,20 @@ if(document.fullscreenElement === undefined) {
 // Instances //
 ///////////////
 
-var sidebar = new Hematite.Sidebar();
-sidebar.addButton({name: 'land'    ,                        faClass: 'fa-university',                              title: 'Landing page'                       });
-sidebar.addButton({name: 'help'    ,                        faClass: 'fa-question'  ,                              title: 'Help'                               });
-var fsButton = sidebar.addButton({name: 'fs'      , type: Hematite.TOGGLE, faClass: 'fa-arrows-alt', faClassAlt: 'fa-arrow-down', title: 'Fullscreen'                         , manual: true});
-sidebar.addButton({name: 'contrast', type: Hematite.TOGGLE, faClass: 'fa-adjust'    , faClassAlt: 'fa-circle-o'  , title: 'Flip contrast'                      });
-sidebar.addButton({name: 'clear'   ,                        faClass: 'fa-recycle'   ,                              title: 'Clear local storage'                });
-sidebar.addButton({name: 'a_toggle', type: Hematite.TOGGLE, char   : 'Q'            , charAlt   : 'T'            , title: 'A toggle button for testing toggles'});
-sidebar.addButton({name: 'select_1', type: Hematite.SELECT, char   : 'S'            ,                              title: 'For testing selects'                });
-sidebar.addButton({name: 'select_2', type: Hematite.SELECT, char   : 'L'            ,                              title: 'For testing selects'                });
-sidebar.addButton({name: 'select_3', type: Hematite.SELECT, char   : 'C'            ,                              title: 'For testing selects'                });
+var sidebar = fE('ht-sidebar', {}, [
+  fE('ht-instant', {id: 'land'       , faClass    : 'fa-university',                              description: 'Landing page'                       }),
+  fE('ht-instant', {id: 'help_button', faClass    : 'fa-question'  ,                              description: 'Help'                               }),
+  
+  fsButton =
+  fE('ht-toggle' , {id: 'fs'         , faClass    : 'fa-arrows-alt', faClassAlt: 'fa-arrow-down', description: 'Fullscreen'                         , manual: true}),
+  fE('ht-toggle' , {id: 'contrast'   , faClass    : 'fa-adjust'    , faClassAlt: 'fa-circle-o'  , description: 'Flip contrast'                      }),
+  fE('ht-instant', {id: 'clear'      , faClass    : 'fa-recycle'   ,                              description: 'Clear local storage'                }),
+  fE('ht-toggle' , {id: 'a_toggle'   , text       : 'Q'            , textAlt   : 'T'            , description: 'A toggle button for testing toggles'}),
+  fE('ht-select' , {id: 'select_1'   , textContent: 'S'            ,                              description: 'For testing selects'                }),
+  fE('ht-select' , {id: 'select_2'   , textContent: 'L'            ,                              description: 'For testing selects'                }),
+  fE('ht-select' , {id: 'select_3'   , textContent: 'C'            ,                              description: 'For testing selects'                })
+]);
+document.body.appendChild(sidebar);
 
 var helpPanel = new Hematite.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
 helpPanel.domElement.appendChild(fE('div', {textContent: 'But this is only a demo'}));
@@ -105,13 +109,13 @@ var darkColors = document.getElementById('dark_colors');
 // Events //
 ////////////
 
-sidebar.on('trigger', function(e) {
-  if(e.target.name === 'land') {
+sidebar.addEventListener('trigger', function(e) {
+  if(e.target.id === 'land') {
     window.location = '/index.html';
   }
 });
 
-sidebar.on('help', function() {
+document.querySelector('#help_button').addEventListener('trigger', function() {
   helpPanel.toggleOpen(true);
 });
 
@@ -133,7 +137,7 @@ document.addEventListener("webkitfullscreenchange", fsHandler);
 document.addEventListener("mozfullscreenchange", fsHandler);
 document.addEventListener("MSFullscreenChange", fsHandler);
 
-sidebar.on('contrast', function(e) {
+document.querySelector('#contrast').addEventListener('click', function(e) {
   if(e.target.state) {
     document.head.removeChild(darkColors);
     localStorage.contrast = 'light';
@@ -143,18 +147,18 @@ sidebar.on('contrast', function(e) {
   }
 });
 
-sidebar.on('clear', function() {
+document.querySelector('#clear').addEventListener('trigger', function() {
   localStorage.clear();
 });
 
-sidebar.on('a_toggle', function(e) {
+document.querySelector('#a_toggle').addEventListener('click', function(e) {
   if(e.target.state) {
     console.log('Toggle test toggled on');
   }
 });
 
-sidebar.on('toggleoff', function(e) {
-  if(e.target.name === 'a_toggle') {
+sidebar.addEventListener('toggleoff', function(e) {
+  if(e.target.id === 'a_toggle') {
     console.log('Toggle test toggled off');
   }
 });

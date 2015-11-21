@@ -1,18 +1,39 @@
 /**
- * @depends AsyNTer
  * @depends Draggabilliy
  */
-var AsyNTer = require('asynter');
 var Draggabilly = require('draggabilly');
 
 var Hematite = exports;
 
-// @method HTMLElement forgeElement(String tagName, Object properties, Array children) -- Daisy-chainable element maker
-Hematite.forgeElement = function forgeElement(tagName, properties, children) {
+// @method HTMLElement createElement(String tagName) -- Extension of document.createElement for creating ht- elements
+Hematite.createElement = function(tagName) {
   var element = document.createElement(tagName);
   
-  for(var p in properties) {
-    element[p] = properties[p];
+  switch(tagName) {
+    case 'ht-instant':
+      Hematite.instantButtonDecorator(element);
+      break;
+    case 'ht-toggle':
+      Hematite.toggleButtonDecorator(element);
+      break;
+    case 'ht-select':
+      Hematite.selectButtonDecorator(element);
+      break;
+    case 'ht-sidebar':
+      Hematite.sidebarDecorator(element);
+  }
+  
+  return element;
+}
+
+// @method HTMLElement forgeElement(String tagName, Object properties, [HTMLElement] children) -- Daisy-chainable element maker
+Hematite.forgeElement = function forgeElement(tagName, properties, children) {
+  var element = Hematite.createElement(tagName);
+  
+  if(properties) {
+    for(var p in properties) {
+      element[p] = properties[p];
+    }
   }
   
   if(children) {
@@ -25,53 +46,262 @@ Hematite.forgeElement = function forgeElement(tagName, properties, children) {
 }
 var fE = Hematite.forgeElement;
 
-// @prop Number INSTANT -- Default button type. For buttons that take effect when pressed
-Hematite.INSTANT = 0;
-
-// @prop Number TOGGLE -- Type code for buttons that toggle
-Hematite.TOGGLE = 1;
-
-// @prop Number SELECT -- Type code for buttons that require selecting a target
-Hematite.SELECT = 2;
-
 /**
- * @module Hematite.Sidebar inherits AsyNTer.Node
- * @description Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
- * @description Icons come from Font Awesome and are specified in the faClass option
- * 
- * @example var sidebar = new Hematite.Sidebar();
- * @example sidebar.addButton({name: 'do_stuff', faClass: 'fa-question', title: 'Tooltip text'});
- * @example sidebar.on('do_stuff', function() {console.log('Doing stuff')});
- * @example sidebar.on('trigger', function(e) {console.log(e.name === 'do_stuff')});
+ * @module \<ht-button\> inherits HTMLUnknownElement
+ * @description Not an instantiable element. Only for other ht- elements to inherit from
+ * @description Icons may be specified as either plain text or font-awesome text icon names
  */
-Hematite.Sidebar = function Sidebar() {
-  AsyNTer.Node.call(this);
+Hematite.buttonDecorator = function(element) {
+  // @prop String className -- Defaults to 'fa button'
+  element.className = 'ht_button fa';
   
-  var self = this;
+  // @prop Number tabIndex -- Defaults to 0, to allow tab navigation
+  element.tabIndex = 0;
   
-  // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
-  this.domElement = fE('div', {id: 'sidebar', tabIndex: 1, accessKey: '1'});
-  
-  // @prop HTMLCollection children -- Alias for domElement.children
-  this.children = this.domElement.children;
-  
-  // @prop HTMLElement|null selection -- Select-type button currently selected, if any
-  var selection = null;
-  Object.defineProperty(this, 'selection', {
-    enumerable: true,
-    get: function() {
-      return selection;
-    },
+  // @prop String description -- Setting .description automatically sets .title
+  // @prop String title -- Automatically set to [keycut from <ht-sidebar>] + ['\n\n'] + [.description]
+  var description = '';
+  Object.defineProperty(element, 'description', {
+    get: function() {return description},
     set: function(v) {
-      if(selection) {
-        selection.classList.remove('selected');
-        self.emit('unselect', {target: selection});
+      description = String(v);
+      
+      var childIndex, key;
+      if(element.parentNode && element.parentNode.tagName === 'HT-SIDEBAR') {
+        childIndex = Array.prototype.indexOf.call(element.parentNode.children, element);
+        
+        key = element.parentNode.keyCuts[childIndex];
       }
       
-      if(v instanceof HTMLElement && v.parentElement === self.domElement) {
+      element.title = description + (description && key ? '\n\n' : '') + (key ? 'Key: ' + String.fromCharCode(key) : '');
+      
+      return description;
+    }
+  });
+  
+  // @prop String faClass -- Name of font-awesome class for an icon
+  var faClass = '';
+  Object.defineProperty(element, 'faClass', {
+    get: function() {return faClass},
+    set: function(v) {
+      if(faClass !== '' && (element.tagName !== 'HT-TOGGLE' || !element.state)) {
+        element.classList.remove(faClass);
+      }
+      
+      faClass = String(v);
+      
+      if(element.tagName !== 'HT-TOGGLE' || !element.state) {
+        element.classList.add(faClass);
+      }
+      
+      return faClass;
+    }
+  });
+}
+
+/**
+ * @module \<ht-instant\> inherits <ht-button>
+ * @description Instant buttons are simple buttons - click them and they fire events
+ * 
+ * @example var instant = Hematite.createElement('ht-instant');
+ * @example instant.faClass = 'fa-gear';
+ * @example instant.addEventListener('trigger', function() {console.log('Triggered!')});
+ * @example document.body.appendChild(instant);
+ */
+Hematite.instantButtonDecorator = function(element) {
+  Hematite.buttonDecorator(element);
+  
+  // @event trigger {Event} -- Fired when an <ht-instant> is clicked
+  element.addEventListener('click', function() {
+    element.dispatchEvent(new Event('trigger', {bubbles: true}));
+    
+    element.parentNode.selection = null;
+  });
+}
+
+/**
+ * @module \<ht-toggle\> inherits <ht-button>
+ * @description Toggle buttons can automatically toggle their icons and fire toggleon/off events
+ * 
+ * @example var toggle = Hematite.createElement('ht-toggle');
+ * @example toggle.faClass = 'fa-bolt';
+ * @example toggle.faClassAlt = 'fa-fire';
+ * @example toggle.addEventListener('toggleon', function() {console.log('Is now on')});
+ * @example toggle.addEventListener('toggleoff', function() {console.log('Is now off')});
+ * @example document.body.appendChild(toggle);
+ */
+Hematite.toggleButtonDecorator = function(element) {
+  Hematite.buttonDecorator(element);
+  
+  // @prop String faClassAlt -- Sets alternative of .faClass to be used while button is toggled on
+  var faClassAlt = '';
+  Object.defineProperty(element, 'faClassAlt', {
+    get: function() {return faClassAlt},
+    set: function(v) {
+      if(faClassAlt !== '' && element.state) {
+        element.classList.remove(faClassAlt);
+      }
+      
+      faClassAlt = String(v);
+      
+      if(element.state) {
+        element.classList.add(faClassAlt);
+      }
+      
+      return faClassAlt;
+    }
+  });
+  
+  // @prop String textContent -- Overwritten by .text and .textAlt when toggled
+  // @prop String text -- Value assigned to .textContent when button is toggled off
+  var text = '';
+  Object.defineProperty(element, 'text', {
+    get: function() {return text},
+    set: function(v) {
+      text = String(v);
+      
+      if(!element.state) {
+        element.textContent = text;
+      }
+      
+      return text;
+    }
+  });
+  
+  // @prop String textAlt -- Value assigned to .textContent when button is toggled on
+  var textAlt = '';
+  Object.defineProperty(element, 'textAlt', {
+    get: function() {return textAlt},
+    set: function(v) {
+      textAlt = String(v);
+      
+      if(element.state) {
+        element.textContent = textAlt;
+      }
+      
+      return textAlt;
+    }
+  });
+  
+  // @prop Boolean state -- Toggle state. Assigned values to .state will toggle button normally
+  // @event toggleon {Event} -- Fired when an <ht-toggle> is toggled on
+  // @event toggleoff {Event} -- Fired when an <ht-toggle> is toggled off
+  var state = false;
+  Object.defineProperty(element, 'state', {
+    get: function() {return state},
+    set: function(v) {
+      if(state === Boolean(v)) {
+        return;
+      }
+      
+      state = Boolean(v);
+      
+      element.textContent = state ? textAlt : text;
+      
+      if(element.faClass !== '') {
+        element.classList.toggle(element.faClass);
+      }
+      if(element.faClassAlt !== '') {
+        element.classList.toggle(element.faClassAlt);
+      }
+      
+      element.dispatchEvent(new Event(state ? 'toggleon' : 'toggleoff', {bubbles: true}));
+    }
+  });
+  
+  // @prop Boolean manual -- If set to true, button will not change state when clicked, only when .state is explicitly set
+  element.manual = false;
+  
+  element.addEventListener('click', function() {
+    if(!element.manual) {
+      element.state = !element.state;
+    }
+    
+    element.parentNode.selection = null;
+  });
+}
+
+/**
+ * @module \<ht-select\> inherits <ht-button>
+ * @description Select buttons automaticlly highlight and set .selection on an <ht-sidebar> they are appended to
+ * 
+ * @example var select1 = Hematite.createElement('ht-select');
+ * @example select1.faClass = 'fa-gear';
+ * @example select1.addEventListener('select', function() {console.log('1 is selected')});
+ * @example
+ * @example var select2 = Hematite.createElement('ht-select');
+ * @example select2.faClass = 'fa-gears';
+ * @example select2.addEventListener('select', function() {console.log('Now 2 is selected')});
+ * @example
+ * @example var sidebar = Hematite.createElement('ht-sidebar');
+ * @example sidebar.appendChild(select1);
+ * @example sidebar.appendChild(select2);
+ * @example document.body.appendChild(sidebar);
+ */
+Hematite.selectButtonDecorator = function(element) {
+  Hematite.buttonDecorator(element);
+  
+  // @event select {Event} -- Fired when an <ht-select> is selected
+  // @event unselect {Event} -- Fired when an <ht-select> is unselected
+  element.addEventListener('click', function() {
+    if(element.parentNode.tagName === 'HT-SIDEBAR') {
+      if(element !== element.parentNode.selection) {
+        element.parentNode.selection = element;
+      }
+      else {
+        element.parentNode.selection = null;
+      }
+    }
+  });
+}
+
+/**
+ * @module \<ht-sidebar\> inherits HTMLUnknownElement
+ * @description Makes a sidebar. Buttons added to the sidebar can be triggered by clicks or keyboard shortcuts 1-9, 0, -, and =
+ * 
+ * @example var toggle = Hematite.createElement('ht-toggle');
+ * @example toggle.faClass = 'fa-flask';
+ * @example toggle.faClassAlt = 'fa-fire';
+ * @example toggle.title = 'Tooltip text';
+ * @example toggle.addEventListener('toggleoff', function() {console.log('Toggled off!')});
+ * @example
+ * @example var sidebar = Hematite.createElement('ht-sidebar');
+ * @example sidebar.addEventListener('toggleon', function(e) {if(e.target === toggle) console.log('Toggle on!')});
+ * @example
+ * @example sidebar.appendChild(toggle);
+ * @example document.body.appendChild(sidebar);
+ */
+Hematite.sidebarDecorator = function(element) {
+  // @prop String id -- Defaults to 'sidebar'
+  element.id = 'ht_sidebar';
+  
+  // @prop Number tabIndex -- Defaults to 1, to allow tab navigation
+  element.tabIndex = 1;
+  
+  // @prop String accessKey -- Defaults to '1'
+  element.accessKey = '1';
+  
+  // @prop String title -- Defaults to 'Key: ' + .accessKeyLabel
+  element.title = 'Key: ' + element.accessKeyLabel;
+  
+  // @prop HTMLElement|null selection -- <ht-select> currently selected, if any. Setting .selection will update highlights and fire un/select
+  var selection = null;
+  Object.defineProperty(element, 'selection', {
+    get: function() {return selection},
+    set: function(v) {
+      if(selection === v) {
+        return;
+      }
+      
+      if(selection) {
+        selection.classList.remove('ht_selected');
+        selection.dispatchEvent(new Event('unselect', {bubbles: true}));
+      }
+      
+      if(v instanceof HTMLElement && v.tagName === 'HT-SELECT' && v.parentNode === element) {
         selection = v;
-        selection.classList.add('selected');
-        self.emit('select', {target: selection});
+        selection.classList.add('ht_selected');
+        selection.dispatchEvent(new Event('select', {bubbles: true}));
       }
       else {
         selection = null;
@@ -79,102 +309,43 @@ Hematite.Sidebar = function Sidebar() {
     }
   });
   
-  document.body.appendChild(this.domElement);
-  this.domElement.title = 'Key: ' + this.domElement.accessKeyLabel;
-  
-  // @prop Object keyCodesToButtonIndices -- Look up a keyCode and get a button index
-  this.keyCodesToButtonIndices = {49: 0, 50: 1, 51: 2, 52: 3, 53: 4, 54: 5, 55: 6, 56: 7, 57: 8, 58: 9, 48: 10, 173: 11, 61: 12};
-  
-  // @prop Array buttonIndicesToKeyChars -- Look up a button index and get a char for its key
-  this.buttonIndicesToKeyChars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
-  
-  // @method undefined addButton(Object {Number type, String faClass, String faClassAlt, String textContent, String textContentAlt, String title, String name, Boolean manual}) -- Add a button. Support font-awesome icon names
-  // @event trigger {HTMLElement target} -- Fired when a button is triggered
-  // @event [name] {HTMLElement target} -- Fired when a button is triggered. Event name is the name defined when the corresponding button was added
-  this.addButton = function(options) {
-    options = options || {};
-    
-    var element = fE('i', {
-      type       : options.type || Hematite.INSTANT,
-      className  : 'fa ' + 'button ' + (options.faClass || ''),
-      faClasses  : [options.faClass || '', options.faClassAlt || ''],
-      textContent: options.char || '',
-      textContents: [options.char || '', options.charAlt || ''],
-      title      : (options.title || 'Not yet described') + '\n\nKey: ' + self.buttonIndicesToKeyChars[self.children.length],
-      name       : options.name || 'No_name_given',
-      tabIndex   : 0,
-      manual     : Boolean(options.manual),
-    });
-    
-    var state = false;
-    Object.defineProperty(element, 'state', {
-      enumerable: true,
-      get: function() {
-        return state;
-      },
-      set: function(v) {
-        if(state === Boolean(v)) {
-          return;
-        }
-        
-        state = Boolean(v);
-        
-        element.textContent = element.textContents[state + 0];
-        
-        if(element.faClasses[state + 0] !== '') {
-          element.classList.add(element.faClasses[state + 0]);
-        }
-        if(element.faClasses[!state + 0] !== '') {
-          element.classList.remove(element.faClasses[!state + 0]);
-        }
-        
-        self.emit(state ? 'toggleon' : 'toggleoff', {target: element});
-      }
-    });
-    
-    element.addEventListener('click', function() {
-      self.emit(element.name, {target: element});
-      
-      switch(element.type) {
-        case Hematite.INSTANT:
-          self.emit('trigger', {target: element});
-          break;
-        case Hematite.TOGGLE:
-          if(!element.manual) {
-            element.state = !element.state;
-          }
-          break;
-      }
-      
-      if(element.type === Hematite.SELECT && element !== self.selection) {
-        self.selection = element;
-      }
-      else {
-        self.selection = null;
-      }
-    });
-    
-    self.domElement.appendChild(element);
-    
-    return element;
-  }
+  // @prop [Number] keyCuts -- .charCodeAt()s for each keycut. (Mostly) work with KeyboardEvent.keycode
+  element.keyCuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+  element.keyCuts.forEach(function(v, i, a) {
+    a[i] = v.charCodeAt(0);
+  });
   
   document.addEventListener('keydown', function(e) {
-    if(!e.altKey && !e.ctrlKey && !e.shiftKey && e.keyCode === 13 && e.target.classList.contains('button')) {
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey && e.keyCode === 13 && e.target.classList.contains('ht_button')) {
       e.target.dispatchEvent(new MouseEvent('click'));
     }
   });
   
   document.addEventListener('keydown', function(e) {
-    var index = self.keyCodesToButtonIndices[e.keyCode];
+    var index = element.keyCuts.indexOf(e.keyCode);
     
-    if(!e.altKey && !e.ctrlKey && !e.shiftKey && self.children[index]) {
-      self.children[index].dispatchEvent(new MouseEvent('click'));
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey && element.children[index]) {
+      element.children[index].dispatchEvent(new MouseEvent('click'));
     }
   });
+  
+  // When a button is added or removed its .title must be updated
+  new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      Array.forEach(mutation.addedNodes, function(node) {
+        if(node.description !== undefined) {
+          node.description = node.description;
+        }
+      });
+      
+      Array.forEach(mutation.removedNodes, function(node) {
+        if(node.description !== undefined) {
+          node.description = node.description;
+        }
+      });
+    });
+  }).observe(element, {childList: true});
 }
-Hematite.Sidebar.prototype = Object.create(AsyNTer.Node.prototype);
-Hematite.Sidebar.prototype.constructor = Hematite.Sidebar;
 
 /**
  * @module Hematite.Panel inherits AsyNTer.Node
@@ -189,13 +360,13 @@ Hematite.Sidebar.prototype.constructor = Hematite.Sidebar;
  * @option String  id          -- CSS ID
  */
 Hematite.Panel = function Panel(options) {
-  AsyNTer.Node.call(this);
+  //AsyNTer.Node.call(this);
   
   var self = this;
   
   // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
-  this.domElement = fE('div', {id: options.id || '', className: 'panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
-    fE('div', {className: 'panel_heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
+  this.domElement = fE('div', {id: options.id || '', className: 'ht_panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
+    fE('div', {className: 'ht_panel_heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
   ]);
   
   this.domElement.title = (options.heading || 'Heading') + (options.accessKey ? '\n\nAccess Key: ' + options.accessKey.toUpperCase() : '');
@@ -207,7 +378,7 @@ Hematite.Panel = function Panel(options) {
   this.closeButton = null;
   if(Boolean(options.closeButton) !== false) {
     this.domElement.appendChild(
-      this.closeButton = fE('i', {className: 'fa fa-close panel_close button', tabIndex: 0, title: 'Close panel\n\nKey: Q'})
+      this.closeButton = fE('i', {className: 'fa fa-close ht_panel_close ht_button', tabIndex: 0, title: 'Close panel\n\nKey: Q'})
     );
     
     this.keyCuts[81] = this.closeButton; // Q is for quit
@@ -240,8 +411,8 @@ Hematite.Panel = function Panel(options) {
     localStorage['dragger_' + self.domElement.id + '_left'] = self.domElement.style.left;
   });
 }
-Hematite.Panel.prototype = Object.create(AsyNTer.Node.prototype);
-Hematite.Panel.prototype.constructor = Hematite.Panel;
+//Hematite.Panel.prototype = Object.create(AsyNTer.Node.prototype);
+//Hematite.Panel.prototype.constructor = Hematite.Panel;
 
 // @method proto undefined open(Boolean focus) -- Adds Panel's domElement to the document. If focus is set, also focuses .domElement
 Hematite.Panel.prototype.open = function(focus) {
@@ -257,7 +428,7 @@ Hematite.Panel.prototype.open = function(focus) {
 Hematite.Panel.prototype.close = function() {
   this.domElement.parentElement.removeChild(this.domElement);
   
-  this.emit('close');
+  this.domElement.dispatchEvent(new Event('close', {bubbles: true}));
 }
 
 // @method proto Boolean isOpen() -- Returns whether panel is currently open (attached to document)
