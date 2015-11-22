@@ -332,17 +332,17 @@ Hematite.sidebarDecorator = function(element) {
   // When a button is added or removed its .title must be updated
   new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
-      Array.forEach(mutation.addedNodes, function(node) {
-        if(node.description !== undefined) {
-          node.description = node.description;
+      for(var i = 0; i < mutation.addedNodes.length; ++i) {
+        if(mutation.addedNodes[i].description !== undefined) {
+          mutation.addedNodes[i].description = mutation.addedNodes[i].description;
         }
-      });
+      }
       
-      Array.forEach(mutation.removedNodes, function(node) {
-        if(node.description !== undefined) {
-          node.description = node.description;
+      for(var i = 0; i < mutation.removedNodes.length; ++i) {
+        if(mutation.removedNodes[i].description !== undefined) {
+          mutation.removedNodes[i].description = mutation.removedNodes[i].description;
         }
-      });
+      }
     });
   }).observe(element, {childList: true});
 }

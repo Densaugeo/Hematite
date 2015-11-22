@@ -113,12 +113,12 @@ var records = {
   unselectCount: 0
 }
 
-Array.forEach(sidebar.children, function(v) {
-  v.addEventListener('click', function(e) {
+for(var i = 0; i < sidebar.children.length; ++i) {
+  sidebar.children[i].addEventListener('click', function(e) {
     records.lastClick = e.target.id;
     ++records.clickCount;
   });
-});
+}
 
 sidebar.addEventListener('trigger', function(e) {
   records.lastTrigger = e.target.id;
