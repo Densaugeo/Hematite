@@ -121,7 +121,6 @@ document.querySelector('#help_button').addEventListener('trigger', function() {
   helpPanel.toggleOpen(true);
 });
 
-// Fullscreen requests cannot be made from within the asynchronous callbacks used by Hematite, for security reasons
 fsButton.addEventListener('click', function(e) {
   if(document.fullscreenElement === undefined) {
     document.body.requestFullscreen();
