@@ -385,7 +385,7 @@ Hematite.Panel = function Panel(options) {
   }
   
   // @prop Draggabilly draggie -- Attachment of Draggabilly library for drag-and-drop positioning
-  this.draggie = new Draggabilly(this.domElement, {handle: '.panel_heading'});
+  this.draggie = new Draggabilly(this.domElement, {handle: '.ht_panel_heading'});
   
   if(localStorage['dragger_' + this.domElement.id + '_top']) {
     this.domElement.style.top  = localStorage['dragger_' + this.domElement.id + '_top' ];
