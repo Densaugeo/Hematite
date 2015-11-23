@@ -101,7 +101,7 @@ document.body.appendChild(sidebar);
 var helpPanel = new Hematite.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
 helpPanel.domElement.appendChild(fE('div', {textContent: 'But this is only a demo'}));
 
-var examplePanel = new Hematite.Panel({id: 'example', heading: 'Here is a panel'});
+var examplePanel = new Hematite.Panel({id: 'example', heading: 'Here is a panel', closeButton: true});
 examplePanel.domElement.appendChild(fE('div', {textContent: 'Stuff can go here'}));
 examplePanel.open();
 
