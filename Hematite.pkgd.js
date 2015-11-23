@@ -341,7 +341,7 @@ Hematite.sidebarDecorator = function(element) {
         }
       }
       
-      for(var i = 0; i < mutation.removedNodes.length; ++i) {
+      for(i = 0; i < mutation.removedNodes.length; ++i) {
         if(mutation.removedNodes[i].description !== undefined) {
           mutation.removedNodes[i].description = mutation.removedNodes[i].description;
         }
