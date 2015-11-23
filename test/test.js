@@ -63,10 +63,10 @@ suite('<ht-button> elements', function() {
   expectedButtons.forEach(function(v, i) {
     test('Button "' + v.id + '" is the correct location', function(done) {
       driver.findElement(By.id(v.id)).getLocation().then(function(res) {
-        assert.strictEqual(res.x, 12);
-        assert.strictEqual(res.y, 12 + 36*i);
-        assert.strictEqual(res.width, 24);
-        assert.strictEqual(res.height, 24);
+        assert.strictEqual(res.x, 6);
+        assert.strictEqual(res.y, 6 + 36*i);
+        assert.strictEqual(res.width, 36);
+        assert.strictEqual(res.height, 36);
         done();
       });
     });
