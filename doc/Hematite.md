@@ -149,7 +149,7 @@ document.body.appendChild(sidebar);
 
 `Number` **tabIndex** -- Defaults to 1, to allow tab navigation
 
-`String` **title** -- Defaults to 'Key: ' + .accessKeyLabel
+`String` **title** -- Defaults to 'Key: ' + .accessKeyLabel, if available
 
 ---
 

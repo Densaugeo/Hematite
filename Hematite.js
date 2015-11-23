@@ -281,8 +281,10 @@ Hematite.sidebarDecorator = function(element) {
   // @prop String accessKey -- Defaults to '1'
   element.accessKey = '1';
   
-  // @prop String title -- Defaults to 'Key: ' + .accessKeyLabel
-  element.title = 'Key: ' + element.accessKeyLabel;
+  // @prop String title -- Defaults to 'Key: ' + .accessKeyLabel, if available
+  if(element.accessKeyLabel) {
+    element.title = 'Key: ' + element.accessKeyLabel;
+  }
   
   // @prop HTMLElement|null selection -- <ht-select> currently selected, if any. Setting .selection will update highlights and fire un/select
   var selection = null;
