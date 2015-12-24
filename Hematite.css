@@ -3,7 +3,7 @@ body {
   font-size: 14px;
   line-height: 1.42857143;
 }
-#ht_background {
+#ht-background {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -11,7 +11,7 @@ body {
   right: 0;
   z-index: -1;
 }
-#ht_sidebar {
+.ht-tray {
   position: fixed;
   top: 0;
   bottom: 0;
@@ -22,21 +22,21 @@ body {
   outline: 0;
 }
 
-.ht_panel {
+.ht-panel {
   position: absolute;
   min-height: 24px;
   z-index: 1;
   padding: 6px;
   outline: 0;
 }
-.ht_panel:hover,
-.ht_panel:focus {
+.ht-panel:hover,
+.ht-panel:focus {
   z-index: 3;
 }
-.ht_panel.is-dragging {
+.ht-panel.is-dragging {
   z-index: 4;
 }
-.ht_panel_heading {
+.ht-panel-heading {
   min-height: 24px;
   margin-bottom: 6px;
   font-size: 16px;
@@ -49,14 +49,14 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
-.ht_panel_close {
+.ht-panel-close {
   position: absolute;
   top: 0;
   right: 0;
   z-index: 1;
 }
 
-.ht_button {
+.ht-button {
   width: 24px;
   padding: 6px;
   font-size: 24px;
@@ -70,7 +70,7 @@ body {
   user-select: none;
 }
 
-.ht_well {
+.ht-well {
   padding: 0 19px;
   border-radius: 4px;
 }

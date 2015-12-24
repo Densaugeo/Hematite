@@ -20,7 +20,7 @@ Icons may be specified as either plain text or font-awesome text icon names
 
 #### Properties
 
-`String` **className** -- Defaults to 'fa button'
+`String` **className** -- Defaults to 'ht-button fa'
 
 `String` **description** -- Setting .description automatically sets .title
 
@@ -141,7 +141,7 @@ document.body.appendChild(sidebar);
 
 `String` **accessKey** -- Defaults to '1'
 
-`String` **id** -- Defaults to 'sidebar'
+`String` **className** -- Defaults to 'ht-tray'
 
 `[Number]` **keyCuts** -- .charCodeAt()s for each keycut. (Mostly) work with KeyboardEvent.keycode
 

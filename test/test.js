@@ -38,7 +38,7 @@ expectedButtons.forEach(function(v) {
   }
 });
 
-var defaultClassName = 'ht_button fa';
+var defaultClassName = 'ht-button fa';
 
 var sidebarDefaultKeycuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
 
@@ -711,7 +711,7 @@ suite('<ht-select> interaction', function() {
     driver.findElement(By.id('select_1')).click();
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      assert.strictEqual(res, defaultClassName + ' ht-selected');
       done();
     });
   });
@@ -730,7 +730,7 @@ suite('<ht-select> interaction', function() {
     driver.findElement(By.id('select_2')).click();
     
     driver.findElement(By.id('select_2')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      assert.strictEqual(res, defaultClassName + ' ht-selected');
       done();
     });
   });
@@ -740,7 +740,7 @@ suite('<ht-select> interaction', function() {
     driver.findElement(By.id('stray_select')).click();
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      assert.strictEqual(res, defaultClassName + ' ht-selected');
     });
     
     driver.findElement(By.id('stray_select')).getAttribute('className').then(function(res) {
@@ -1001,7 +1001,7 @@ suite('<ht-select> interaction', function() {
     });
     
     driver.findElement(By.id('select_1')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      assert.strictEqual(res, defaultClassName + ' ht-selected');
       done();
     });
   });
@@ -1024,7 +1024,7 @@ suite('<ht-select> interaction', function() {
     });
     
     driver.findElement(By.id('select_2')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, defaultClassName + ' ht_selected');
+      assert.strictEqual(res, defaultClassName + ' ht-selected');
       done();
     });
   });
@@ -1086,7 +1086,7 @@ suite('Hematite.Panel', function() {
   
   test('Panel has correct CSS classes', function(done) {
     driver.findElement(By.id('panel_test')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'ht_panel');
+      assert.strictEqual(res, 'ht-panel');
       done();
     });
   });

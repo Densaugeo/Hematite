@@ -53,8 +53,8 @@ var fE = Hematite.forgeElement;
  * @description Icons may be specified as either plain text or font-awesome text icon names
  */
 Hematite.buttonDecorator = function(element) {
-  // @prop String className -- Defaults to 'fa button'
-  element.className = 'ht_button fa';
+  // @prop String className -- Defaults to 'ht-button fa'
+  element.className = 'ht-button fa';
   
   // @prop Number tabIndex -- Defaults to 0, to allow tab navigation
   element.tabIndex = 0;
@@ -273,8 +273,8 @@ Hematite.selectButtonDecorator = function(element) {
  * @example document.body.appendChild(sidebar);
  */
 Hematite.sidebarDecorator = function(element) {
-  // @prop String id -- Defaults to 'sidebar'
-  element.id = 'ht_sidebar';
+  // @prop String className -- Defaults to 'ht-tray'
+  element.className = 'ht-tray';
   
   // @prop Number tabIndex -- Defaults to 1, to allow tab navigation
   element.tabIndex = 1;
@@ -297,13 +297,13 @@ Hematite.sidebarDecorator = function(element) {
       }
       
       if(selection) {
-        selection.classList.remove('ht_selected');
+        selection.classList.remove('ht-selected');
         selection.dispatchEvent(new Event('unselect', {bubbles: true}));
       }
       
       if(v instanceof HTMLElement && v.tagName === 'HT-SELECT' && v.parentNode === element) {
         selection = v;
-        selection.classList.add('ht_selected');
+        selection.classList.add('ht-selected');
         selection.dispatchEvent(new Event('select', {bubbles: true}));
       }
       else {
@@ -319,7 +319,7 @@ Hematite.sidebarDecorator = function(element) {
   });
   
   document.addEventListener('keydown', function(e) {
-    if(!e.altKey && !e.ctrlKey && !e.shiftKey && e.keyCode === 13 && e.target.classList.contains('ht_button')) {
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey && e.keyCode === 13 && e.target.classList.contains('ht-button')) {
       e.target.dispatchEvent(new MouseEvent('click'));
     }
   });
@@ -368,8 +368,8 @@ Hematite.Panel = function Panel(options) {
   var self = this;
   
   // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
-  this.domElement = fE('div', {id: options.id || '', className: 'ht_panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
-    fE('div', {className: 'ht_panel_heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
+  this.domElement = fE('div', {id: options.id || '', className: 'ht-panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
+    fE('div', {className: 'ht-panel-heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
   ]);
   
   this.domElement.title = (options.heading || 'Heading') + (options.accessKey ? '\n\nAccess Key: ' + options.accessKey.toUpperCase() : '');
@@ -381,18 +381,18 @@ Hematite.Panel = function Panel(options) {
   this.closeButton = null;
   if(Boolean(options.closeButton) !== false) {
     this.domElement.appendChild(
-      this.closeButton = fE('i', {className: 'fa fa-close ht_panel_close ht_button', tabIndex: 0, title: 'Close panel\n\nKey: Q'})
+      this.closeButton = fE('i', {className: 'fa fa-close ht-panel-close ht-button', tabIndex: 0, title: 'Close panel\n\nKey: Q'})
     );
     
     this.keyCuts[81] = this.closeButton; // Q is for quit
   }
   
   // @prop Draggabilly draggie -- Attachment of Draggabilly library for drag-and-drop positioning
-  this.draggie = new Draggabilly(this.domElement, {handle: '.ht_panel_heading'});
+  this.draggie = new Draggabilly(this.domElement, {handle: '.ht-panel-heading'});
   
-  if(localStorage['dragger_' + this.domElement.id + '_top']) {
-    this.domElement.style.top  = localStorage['dragger_' + this.domElement.id + '_top' ];
-    this.domElement.style.left = localStorage['dragger_' + this.domElement.id + '_left'];
+  if(localStorage['dragger-' + this.domElement.id + '-top']) {
+    this.domElement.style.top  = localStorage['dragger-' + this.domElement.id + '-top' ];
+    this.domElement.style.left = localStorage['dragger-' + this.domElement.id + '-left'];
   }
   
   this.domElement.addEventListener('keydown', function(e) {

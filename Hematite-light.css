@@ -2,47 +2,47 @@ body {
   color: #222;
   background: #FFF;
 }
-#ht_background {
+#ht-background {
   background: url('diagram-light.jpg') no-repeat center;
   background-size: auto 100%;
 }
-#ht_sidebar {
+.ht-tray {
   background: #FFF;
   box-shadow: 0 0 5px 3px #888;
 }
-#ht_sidebar:hover,
-#ht_sidebar:focus {
+.ht-tray:hover,
+.ht-tray:focus {
   box-shadow: 0 0 5px 3px #088;
 }
 
-.ht_panel {
+.ht-panel {
   background: #FFF;
   box-shadow: 0 0 5px 3px #888;
 }
-.ht_panel:hover,
-.ht_panel:focus {
+.ht-panel:hover,
+.ht-panel:focus {
   box-shadow: 0 0 5px 3px #088;
 }
-.ht_panel_close {
+.ht-panel-close {
   background: rgba(255, 255, 255, 0.75);
 }
-.ht_panel_heading {
+.ht-panel-heading {
   color: #044;
 }
 
-.ht_button:hover,
-.ht_button:focus {
+.ht-button:hover,
+.ht-button:focus {
   color: #0AA;
   outline: none;
 }
-.ht_button:focus:active {
+.ht-button:focus:active {
   color: #0A0;
 }
-.ht_button.ht_selected {
+.ht-button.ht-selected {
   color: #AA0;
 }
 
-.ht_well {
+.ht-well {
   border: 1px solid #888;
   background-image: linear-gradient(to top, rgba(192, 192, 192, 0.3) 0px, rgba(255, 255, 255, 0.3) 100%);
   box-shadow: 0px 0px 2px #888 inset;
