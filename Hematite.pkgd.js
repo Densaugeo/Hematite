@@ -390,9 +390,9 @@ Hematite.Panel = function Panel(options) {
   // @prop Draggabilly draggie -- Attachment of Draggabilly library for drag-and-drop positioning
   this.draggie = new Draggabilly(this.domElement, {handle: '.ht-panel-heading'});
   
-  if(localStorage['dragger-' + this.domElement.id + '-top']) {
-    this.domElement.style.top  = localStorage['dragger-' + this.domElement.id + '-top' ];
-    this.domElement.style.left = localStorage['dragger-' + this.domElement.id + '-left'];
+  if(localStorage['dragger_' + this.domElement.id + '_top']) {
+    this.domElement.style.top  = localStorage['dragger_' + this.domElement.id + '_top' ];
+    this.domElement.style.left = localStorage['dragger_' + this.domElement.id + '_left'];
   }
   
   this.domElement.addEventListener('keydown', function(e) {
