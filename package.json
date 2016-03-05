@@ -24,7 +24,7 @@
   "main": "Hematite.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Densaugeo/Hematite"
+    "url": "https://github.com/Densaugeo/Hematite.git"
   },
   "scripts": {
     "lint": "jshint *.js",
