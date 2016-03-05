@@ -1,21 +1,13 @@
 {
   "name": "hematite",
+  "version": "1.1.2",
   "description": "UI for specialized SPAs",
-  "version": "1.1.1",
-  "main": "Hematite.js",
-  "homepage": "https://github.com/Densaugeo/Hematite",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Densaugeo/Hematite"
-  },
   "keywords": [],
-  "license": "MIT",
-  "private": false,
-  "dependencies": {
-    "draggabilly": "^1.2.4",
-    "font-awesome": "^4.4.0"
-  },
-  "author": "Densaugeo <a@b.c> (http://www.madengineersworkshop.net/)",
+  "homepage": "https://github.com/Densaugeo/Hematite",
+  "bugs": "https://github.com/Densaugeo/Hematite/issues",
+  "license": "LGPL-2.1+",
+  "author": "Densaugeo (http://www.madengineersworkshop.net/)",
+  "contributors": [],
   "files": [
     "doc",
     "diagram-dark.jpg",
@@ -29,7 +21,22 @@
     "package.json",
     "README.md"
   ],
-  "bugs": "https://github.com/Densaugeo/Hematite/issues",
+  "main": "Hematite.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Densaugeo/Hematite"
+  },
+  "scripts": {
+    "lint": "jshint *.js",
+    "test": "mocha test/test.js",
+    "doc": "thoth Hematite.js > doc/Hematite.md",
+    "build": "browserify -s Hematite Hematite.js > Hematite.pkgd.js"
+  },
+  "config": {},
+  "dependencies": {
+    "draggabilly": "^1.2.4",
+    "font-awesome": "^4.4.0"
+  },
   "devDependencies": {
     "browserify": "^11.0.1",
     "jshint": "^2.8.0",
@@ -37,10 +44,5 @@
     "selenium-webdriver": "2.x.x",
     "thoth-doc": "0.0.x"
   },
-  "scripts": {
-    "lint": "jshint *.js",
-    "test": "mocha test/test.js",
-    "doc": "thoth Hematite.js > doc/Hematite.md",
-    "build": "browserify -s Hematite Hematite.js > Hematite.pkgd.js"
-  }
+  "engines": {}
 }
