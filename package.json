@@ -35,13 +35,13 @@
   "config": {},
   "dependencies": {
     "draggabilly": "^1.2.4",
-    "font-awesome": "^4.4.0"
+    "font-awesome": "^4.6.1"
   },
   "devDependencies": {
-    "browserify": "^11.0.1",
-    "jshint": "^2.8.0",
-    "mocha": "2.x.x",
-    "selenium-webdriver": "2.x.x",
+    "browserify": "^13.0.0",
+    "jshint": "^2.9.2",
+    "mocha": "^2.4.5",
+    "selenium-webdriver": "^2.53.2",
     "thoth-doc": "0.0.x"
   },
   "engines": {}
