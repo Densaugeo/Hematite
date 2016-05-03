@@ -316,7 +316,7 @@ Hematite.sidebarDecorator = function(element) {
   });
   
   // @prop [Number] keyCuts -- .charCodeAt()s for each keycut. (Mostly) work with KeyboardEvent.keycode
-  element.keyCuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+  element.keyCuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
   element.keyCuts.forEach(function(v, i, a) {
     a[i] = v.charCodeAt(0);
   });

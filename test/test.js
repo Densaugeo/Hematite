@@ -47,7 +47,7 @@ expectedButtons.forEach(function(v) {
 
 var defaultClassName = 'ht-button fa';
 
-var sidebarDefaultKeycuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+var sidebarDefaultKeycuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 
 suite('<ht-button> elements', function() {
   suiteSetup(function(done) {
