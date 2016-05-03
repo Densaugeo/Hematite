@@ -98,12 +98,15 @@ var sidebar = fE('ht-sidebar', {}, [
 ]);
 document.body.appendChild(sidebar);
 
-var helpPanel = new Hematite.Panel({id: 'help', heading: 'A Panel That Could Be Helpful'});
-helpPanel.domElement.appendChild(fE('div', {textContent: 'But this is only a demo'}));
+var helpPanel = fE('ht-panel', {id: 'help', headingText: 'A Panel That Could Be Helpful', open: false}, [
+  fE('div', {textContent: 'But this is only a demo'})
+]);
+document.body.appendChild(helpPanel);
 
-var examplePanel = new Hematite.Panel({id: 'example', heading: 'Here is a panel', closeButton: true});
-examplePanel.domElement.appendChild(fE('div', {textContent: 'Stuff can go here'}));
-examplePanel.open();
+var examplePanel = fE('ht-panel', {id: 'example', headingText: 'Here is a panel'}, [
+  fE('div', {textContent: 'Stuff can go here'})
+]);
+document.body.appendChild(examplePanel);
 
 var darkColors = document.getElementById('dark_colors');
 
@@ -118,7 +121,7 @@ sidebar.addEventListener('trigger', function(e) {
 });
 
 document.querySelector('#help_button').addEventListener('trigger', function() {
-  helpPanel.toggleOpen(true);
+  helpPanel.open = !helpPanel.open;
 });
 
 fsButton.addEventListener('click', function(e) {

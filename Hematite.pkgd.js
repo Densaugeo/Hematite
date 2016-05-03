@@ -22,6 +22,10 @@ Hematite.createElement = function(tagName) {
       break;
     case 'ht-sidebar':
       Hematite.sidebarDecorator(element);
+      break;
+    case 'ht-panel':
+      Hematite.panelDecorator(element);
+      break;
   }
   
   return element;
@@ -351,101 +355,114 @@ Hematite.sidebarDecorator = function(element) {
 }
 
 /**
- * @module Hematite.Panel inherits AsyNTer.Node
- * @description Makes a panel. Includes draggability and close button
+ * @module \<ht-panel\> inherits HTMLUnknownElement
+ * @description Standard Hematite UI panel
  * 
- * @example var panel = new Hematite.Panel({id: 'css_id', heading: 'Your heading here', closeButton: true, accessKey: 'a'});
- * @example panel.open();
- * 
- * @option String  accessKey   -- Browser accesskey
- * @option Boolean closeButton -- Show a close button?
- * @option String  heading     -- Heading text
- * @option String  id          -- CSS ID
+ * @example var example_panel = Hematite.createElement('ht-panel');
+ * @example example_panel.headingText = 'Here is a panel';
+ * @example document.body.appendChild(example_panel);
+ * @example
+ * @example var content = document.createElement('div');
+ * @example content.textContent = 'Stuff can go here';
+ * @example example_panel.appendChild(content);
+ * @example
+ * @example // Or, using the forgeElement helper function:
+ * @example var example_panel = Hematite.fE('ht-panel', {headingText: 'Here is a panel'}, [
+ * @example   fE('div', {textContent: 'Stuff can go here'})
+ * @example ]);
+ * @example document.body.appendChild(example_panel);
  */
-Hematite.Panel = function Panel(options) {
-  //AsyNTer.Node.call(this);
+Hematite.panelDecorator = function(element) {
+  // @prop String className -- Defaults to 'ht-panel'
+  element.className = 'ht-panel';
   
-  var self = this;
+  // @prop Number tabIndex -- Defaults to 0, to allow tab navigation
+  element.tabIndex = 0;
   
-  // @prop HTMLElement domElement -- div tag that holds all of the Panel's HTML elements
-  this.domElement = fE('div', {id: options.id || '', className: 'ht-panel', tabIndex: 0, accessKey: options.accessKey || ''}, [
-    fE('div', {className: 'ht-panel-heading', textContent: options.heading || 'Heading', title: 'Click and drag to move panel'}),
-  ]);
+  // @prop HTMLElement heading -- HTML element for heading
+  element.heading = element.appendChild(fE('div', {className: 'ht-panel-heading', title: 'Click and drag to move panel'}));
   
-  this.domElement.title = (options.heading || 'Heading') + (options.accessKey ? '\n\nAccess Key: ' + options.accessKey.toUpperCase() : '');
-  
-  // @prop Object keyCuts -- Key-value store of keyboard shortcuts. Keys are .keyCode numbers, values are HTMLElement references
-  this.keyCuts = {};
-  
-  // @prop HTMLElement closeButton -- Reference to the close button (may not exist, depending on options)
-  this.closeButton = null;
-  if(Boolean(options.closeButton) !== false) {
-    this.domElement.appendChild(
-      this.closeButton = fE('i', {className: 'fa fa-close ht-panel-close ht-button', tabIndex: 0, title: 'Close panel\n\nKey: Q'})
-    );
-    
-    this.keyCuts[81] = this.closeButton; // Q is for quit
-  }
-  
-  // @prop Draggabilly draggie -- Attachment of Draggabilly library for drag-and-drop positioning
-  this.draggie = new Draggabilly(this.domElement, {handle: '.ht-panel-heading'});
-  
-  if(localStorage['dragger_' + this.domElement.id + '_top']) {
-    this.domElement.style.top  = localStorage['dragger_' + this.domElement.id + '_top' ];
-    this.domElement.style.left = localStorage['dragger_' + this.domElement.id + '_left'];
-  }
-  
-  this.domElement.addEventListener('keydown', function(e) {
-    if(!e.altKey && !e.ctrlKey && !e.shiftKey && self.keyCuts[e.keyCode]) {
-      e.stopPropagation();
-      
-      self.keyCuts[e.keyCode].dispatchEvent(new MouseEvent('click'));
+  // @prop String headingText -- Corresponds to .textContent of headingText HTML element
+  Object.defineProperty(element, 'headingText', {
+    enumerable: true,
+    get: function() {
+      return this.children[0].textContent;
+    },
+    set: function(v) {
+      this.children[0].textContent = v;
+      this._setTitle();
     }
   });
   
-  if(Boolean(options.closeButton) !== false) {
-    this.closeButton.addEventListener('click', function() {
-      self.close();
-    });
-  }
+  // @prop HTMLElement closeButton -- Reference to the close button
+  element.closeButton = fE('i', {className: 'fa fa-close ht-panel-close ht-button', tabIndex: 0, title: 'Close panel'});
+  element.appendChild(element.closeButton);
   
-  this.draggie.on('dragEnd', function() {
-    localStorage['dragger_' + self.domElement.id + '_top' ] = self.domElement.style.top ;
-    localStorage['dragger_' + self.domElement.id + '_left'] = self.domElement.style.left;
+  element.closeButton.addEventListener('click', function() {
+    element.open = false;
   });
-}
-//Hematite.Panel.prototype = Object.create(AsyNTer.Node.prototype);
-//Hematite.Panel.prototype.constructor = Hematite.Panel;
-
-// @method proto undefined open(Boolean focus) -- Adds Panel's domElement to the document. If focus is set, also focuses .domElement
-Hematite.Panel.prototype.open = function(focus) {
-  document.body.appendChild(this.domElement);
   
-  if(focus) {
-    this.domElement.focus();
-  }
-}
-
-// @method proto undefined close() -- Removes Panel's domElement from the document
-// @event close {} -- Fired on panel close
-Hematite.Panel.prototype.close = function() {
-  this.domElement.parentElement.removeChild(this.domElement);
+  // @prop Boolean showCloseButton -- True if close button is displayed. Works via CSS display property. Default true
+  var showCloseButton = true;
+  Object.defineProperty(element, 'showCloseButton', {
+    enumerable: true,
+    get: function() {
+      return showCloseButton;
+    },
+    set: function(v) {
+      this.closeButton.style.display = v ? '' : 'none';
+      showCloseButton = Boolean(v);
+    }
+  });
   
-  this.domElement.dispatchEvent(new Event('close', {bubbles: true}));
-}
-
-// @method proto Boolean isOpen() -- Returns whether panel is currently open (attached to document)
-Hematite.Panel.prototype.isOpen = function() {
-  return this.domElement.parentElement === document.body;
-}
-
-// @method proto undefined toggleOpen(Boolean focus) -- Toggle .domElement on and off of document.body
-Hematite.Panel.prototype.toggleOpen = function(focus) {
-  if(this.isOpen()) {
-    this.close();
-  } else {
-    this.open(focus);
+  // @prop Object keyCuts -- Key-value store of keyboard shortcuts. Keys are .keyCode numbers, values are HTMLElement references
+  element.keyCuts = {};
+  element.addEventListener('keydown', function(e) {
+    if(!e.altKey && !e.ctrlKey && !e.shiftKey && element.keyCuts[e.keyCode]) {
+      e.stopPropagation();
+      
+      element.keyCuts[e.keyCode].dispatchEvent(new MouseEvent('click'));
+    }
+  });
+  
+  // @prop Boolean open -- True if panel is displayed. Works via CSS display property
+  // @event open {} -- Fired on panel open
+  // @event close {} -- Fired on panel close
+  var open = true;
+  Object.defineProperty(element, 'open', {
+    enumerable: true,
+    get: function() {
+      return open;
+    },
+    set: function(v) {
+      this.style.display = v ? '' : 'none';
+      this.dispatchEvent(new Event(v ? 'open' : 'close', {bubbles: true}));
+      open = Boolean(v);
+    }
+  });
+  element.dispatchEvent(new Event('open', {bubbles: true}));
+  
+  // @method undefined _setTitle() -- Updates .title, based on .headingText and .accessKey
+  element._setTitle = function() {
+    this.title = this.headingText + (this.headingText && this.accessKey ? '\n\n' : '') + (this.accessKey ? 'Key: ' : '') + this.accessKey.toUpperCase();
   }
+  
+  new MutationObserver(function() {
+    element._setTitle();
+  }).observe(element, {attributes: true, attributeFilter: ['accesskey']});
+  
+  // @prop Draggabilly _draggie -- Attachment of Draggabilly library for drag-and-drop positioning
+  element._draggie = new Draggabilly(element, {handle: '.ht-panel-heading'});
+  
+  if(localStorage['dragger_' + element.id + '_top']) {
+    element.style.top  = localStorage['dragger_' + element.id + '_top' ];
+    element.style.left = localStorage['dragger_' + element.id + '_left'];
+  }
+  
+  element._draggie.on('dragEnd', function() {
+    localStorage['dragger_' + element.id + '_top' ] = element.style.top ;
+    localStorage['dragger_' + element.id + '_left'] = element.style.left;
+  });
 }
 
 },{"draggabilly":2}],2:[function(require,module,exports){

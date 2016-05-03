@@ -24,6 +24,7 @@ body {
 
 .ht-panel {
   position: absolute;
+  display: block;
   min-height: 24px;
   z-index: 1;
   padding: 6px;

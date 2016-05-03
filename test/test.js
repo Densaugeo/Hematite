@@ -14,6 +14,13 @@ var checkRecords = function(test) {
   });
 }
 
+var assert_function = function(query, expected, done) {
+  driver.executeScript(query).then(function(res) {
+    assert.strictEqual(res, expected);
+    done();
+  });
+}
+
 var Hematite = {};
 
 var expectedButtons = [
@@ -1076,30 +1083,248 @@ suite('<ht-sidebar>', function() {
   });
 });
 
-suite('Hematite.Panel', function() {
-  test('Panel is visible', function(done) {
-    driver.findElement(By.id('panel_test')).isDisplayed().then(function(res) {
+suite('<ht-panel> elements', function() {
+  suiteSetup(function(done) {
+    this.timeout(10000);
+    
+    driver.get(testURL).then(function() {
+      done();
+    });
+  });
+  
+  test('Panel has correct .tagName', function(done) {
+    assert_function(function() {
+      return blank_panel.tagName;
+    }, 'HT-PANEL', done);
+  });
+  
+  test('Panel is visible (after being appended to DOM)', function(done) {
+    driver.findElement(By.id('blank_panel')).isDisplayed().then(function(res) {
       assert.strictEqual(res, true);
       done();
     });
   });
   
-  test('Panel has correct CSS classes', function(done) {
-    driver.findElement(By.id('panel_test')).getAttribute('className').then(function(res) {
-      assert.strictEqual(res, 'ht-panel');
+  test('Panel has ht-panel CSS class', function(done) {
+    assert_function(function() {
+      return blank_panel.className;
+    }, 'ht-panel', done);
+  });
+  
+  test('.tabIndex defaults to zero', function(done) {
+    assert_function(function() {
+      return blank_panel.tabIndex;
+    }, 0, done);
+  });
+  
+  test('.heading is a child <div> element', function(done) {
+    assert_function(function() {
+      return blank_panel.heading.tagName;
+    }, 'DIV', done);
+  });
+  
+  test('.heading has ht-panel-heading CSS class', function(done) {
+    assert_function(function() {
+      return blank_panel.heading.className;
+    }, 'ht-panel-heading', done);
+  });
+  
+  test('.heading is visible', function(done) {
+    driver.findElement(By.css('#blank_panel > div.ht-panel-heading')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, true);
       done();
     });
   });
   
-  test('Heading has correct .textContent');
+  test('.heading.title defaults to drag message', function(done) {
+    assert_function(function() {
+      return blank_panel.heading.title;
+    }, 'Click and drag to move panel', done);
+  });
   
-  test('Heading has correct CSS classes');
+  test('.heading.textContent defaults to empty string', function(done) {
+    assert_function(function() {
+      return blank_panel.heading.textContent;
+    }, '', done);
+  });
   
-  test('Dragging heading moves Panel');
+  test('.headingText defaults to empty string', function(done) {
+    assert_function(function() {
+      return blank_panel.headingText;
+    }, '', done);
+  });
   
-  test('Panel position is saved across refreshes');
+  test('.closeButton is a child <i> element', function(done) {
+    assert_function(function() {
+      return blank_panel.closeButton.tagName;
+    }, 'I', done);
+  });
   
-  test('Close button closes panel');
+  test('.closeButton has correct CSS classes', function(done) {
+    assert_function(function() {
+      return blank_panel.closeButton.className;
+    }, 'fa fa-close ht-panel-close ht-button', done);
+  });
+  
+  test('.closeButton is visible', function(done) {
+    driver.findElement(By.css('#blank_panel > i.ht-panel-close')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, true);
+      done();
+    });
+  });
+  
+  test('.closeButton.title defaults to \'Close panel\'', function(done) {
+    assert_function(function() {
+      return blank_panel.closeButton.title;
+    }, 'Close panel', done);
+  });
+  
+  test('.closeButton.tabIndex defaults to zero', function(done) {
+    assert_function(function() {
+      return blank_panel.closeButton.tabIndex;
+    }, 0, done);
+  });
+  
+  test('.showCloseButton defaults to true', function(done) {
+    assert_function(function() {
+      return blank_panel.showCloseButton;
+    }, true, done);
+  });
+  
+  test('.open defaults to true', function(done) {
+    assert_function(function() {
+      return blank_panel.open;
+    }, true, done);
+  });
+});
+
+suite('<ht-panel> interaction', function() {
+  setup(function(done) {
+    driver.get(testURL).then(function() {
+      done();
+    });
+  });
+  
+  test('Setting .headingText updates .heading.textContent', function(done) {
+    assert_function(function() {
+      blank_panel.headingText = 'Some heading text';
+      return blank_panel.heading.textContent;
+    }, 'Some heading text', done);
+  });
+  
+  test('Setting .headingText updates .title', function(done) {
+    assert_function(function() {
+      blank_panel.headingText = 'Some heading text';
+      return blank_panel.title;
+    }, 'Some heading text', done);
+  });
+  
+  test('Setting .accessKey updates .title', function(done) {
+    // The title isn't updated until a little bit after .accessKey is Set. This arrangement seems to wait long enough
+    driver.executeScript(function() {
+      blank_panel.accessKey = 'k';
+    }).then(function() {
+      assert_function(function() {
+        return blank_panel.title;
+      }, 'Key: K', done);
+    });
+  });
+  
+  test('Setting both .headingText and .accessKey updates .title with both', function(done) {
+    // The title isn't updated until a little bit after .accessKey is Set. This arrangement seems to wait long enough
+    driver.executeScript(function() {
+      blank_panel.headingText = 'Some heading text';
+      blank_panel.accessKey = 'k';
+    }).then(function() {
+      assert_function(function() {
+        return blank_panel.title;
+      }, 'Some heading text\n\nKey: K', done);
+    });
+  });
+  
+  test('Clicking close button closes panel', function(done) {
+    driver.findElement(By.css('#blank_panel > i.ht-panel-close')).click();
+    
+    driver.findElement(By.id('blank_panel')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, false);
+      done();
+    });
+  });
+  
+  test('Setting .showCloseButton shows/hides .closeButton', function(done) {
+    driver.executeScript(function() {
+      blank_panel.showCloseButton = false;
+    });
+    
+    driver.findElement(By.css('#blank_panel > i.ht-panel-close')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, false);
+    });
+    
+    driver.executeScript(function() {
+      blank_panel.showCloseButton = true;
+    });
+    
+    driver.findElement(By.css('#blank_panel > i.ht-panel-close')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, true);
+      done();
+    });
+  });
+  
+  test('Adding an element to .keyCuts causes it to be clicked by the corresponding key', function(done) {
+    driver.executeScript(function() {
+      blank_panel.keyCuts[90] = blank_panel.closeButton; // Z
+    });
+    
+    driver.findElement(By.id('blank_panel')).sendKeys('z');
+    
+    driver.findElement(By.id('blank_panel')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, false);
+      done();
+    });
+  });
+  
+  test('Keycuts do not activate when ctrl/alt/shift are held or different key is pressed', function(done) {
+    driver.executeScript(function() {
+      blank_panel.keyCuts[90] = blank_panel.closeButton; // Z
+    });
+    
+    driver.findElement(By.id('blank_panel')).sendKeys('q');
+    driver.findElement(By.id('blank_panel')).sendKeys(webdriver.Key.chord(webdriver.Key.CONTROL, 'z'));
+    driver.findElement(By.id('blank_panel')).sendKeys(webdriver.Key.chord(webdriver.Key.ALT, 'z'));
+    driver.findElement(By.id('blank_panel')).sendKeys(webdriver.Key.chord(webdriver.Key.SHIFT, 'z'));
+    
+    driver.findElement(By.id('blank_panel')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, true);
+      done();
+    });
+  });
+  
+  test('Setting .open shows/hides panel', function(done) {
+    driver.executeScript(function() {
+      blank_panel.open = false;
+    });
+    
+    driver.findElement(By.id('blank_panel')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, false);
+    });
+    
+    driver.executeScript(function() {
+      blank_panel.open = true;
+    });
+    
+    driver.findElement(By.id('blank_panel')).isDisplayed().then(function(res) {
+      assert.strictEqual(res, true);
+      done();
+    });
+  });
+  
+  test('Draggabilly is added to panel', function(done) {
+    assert_function(function() {
+      return blank_panel._draggie.constructor.name === 'Draggabilly' &&
+             blank_panel._draggie.handles.length === 1 &&
+             blank_panel._draggie.handles[0] === blank_panel.heading;
+    }, true, done);
+  });
 });
 
 suite('Extras', function() {

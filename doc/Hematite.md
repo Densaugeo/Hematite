@@ -153,48 +153,55 @@ document.body.appendChild(sidebar);
 
 ---
 
-## Hematite.Panel
+## \<ht-panel\>
 
-Inherits: `AsyNTer.Node`
+Inherits: `HTMLUnknownElement`
 
-Makes a panel. Includes draggability and close button
+Standard Hematite UI panel
 
 ```
-var panel = new Hematite.Panel({id: 'css_id', heading: 'Your heading here', closeButton: true, accessKey: 'a'});
-panel.open();
+var example_panel = Hematite.createElement('ht-panel');
+example_panel.headingText = 'Here is a panel';
+document.body.appendChild(example_panel);
+
+var content = document.createElement('div');
+content.textContent = 'Stuff can go here';
+example_panel.appendChild(content);
+
+// Or, using the forgeElement helper function:
+var example_panel = Hematite.fE('ht-panel', {headingText: 'Here is a panel'}, [
+  fE('div', {textContent: 'Stuff can go here'})
+]);
+document.body.appendChild(example_panel);
 ```
-
-#### Options
-
-`String` **accessKey** -- Browser accesskey
-
-`Boolean` **closeButton** -- Show a close button?
-
-`String` **heading** -- Heading text
-
-`String` **id** -- CSS ID
 
 #### Properties
 
-`HTMLElement` **closeButton** -- Reference to the close button (may not exist, depending on options)
+`Draggabilly` **_draggie** -- Attachment of Draggabilly library for drag-and-drop positioning
 
-`HTMLElement` **domElement** -- div tag that holds all of the Panel's HTML elements
+`String` **className** -- Defaults to 'ht-panel'
 
-`Draggabilly` **draggie** -- Attachment of Draggabilly library for drag-and-drop positioning
+`HTMLElement` **closeButton** -- Reference to the close button
+
+`HTMLElement` **heading** -- HTML element for heading
+
+`String` **headingText** -- Corresponds to .textContent of headingText HTML element
 
 `Object` **keyCuts** -- Key-value store of keyboard shortcuts. Keys are .keyCode numbers, values are HTMLElement references
 
+`Boolean` **open** -- True if panel is displayed. Works via CSS display property
+
+`Boolean` **showCloseButton** -- True if close button is displayed. Works via CSS display property. Default true
+
+`Number` **tabIndex** -- Defaults to 0, to allow tab navigation
+
 #### Methods
 
-`undefined` proto **close**`()` -- Removes Panel's domElement from the document
-
-`Boolean` proto **isOpen**`()` -- Returns whether panel is currently open (attached to document)
-
-`undefined` proto **open**`(Boolean focus)` -- Adds Panel's domElement to the document. If focus is set, also focuses .domElement
-
-`undefined` proto **toggleOpen**`(Boolean focus)` -- Toggle .domElement on and off of document.body
+`undefined` **_setTitle**`()` -- Updates .title, based on .headingText and .accessKey
 
 #### Events
 
 **close** `{}` -- Fired on panel close
+
+**open** `{}` -- Fired on panel open
 

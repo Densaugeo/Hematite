@@ -81,16 +81,15 @@ var sidebar = fE('ht-sidebar', {}, [
   fE('ht-instant', {id: 'filler_2' , faClass    : 'fa-gear'}),
   fE('ht-instant', {id: 'filler_3' , faClass    : 'fa-gears'     ,                            description: 'Filling past the keycut slots'}),
 ]);
-
 document.body.appendChild(sidebar);
 
 document.body.appendChild(fE('ht-select', {
   id: 'stray_select', faClass: 'fa-space-shuttle', description: 'A select button by itself'
 }));
 
-var examplePanel = new Hematite.Panel({id: 'panel_test', heading: 'Here is a panel', closeButton: true});
-examplePanel.domElement.appendChild(fE('div', {textContent: 'Stuff can go here'}));
-examplePanel.open();
+var blank_panel = Hematite.createElement('ht-panel');
+blank_panel.id = 'blank_panel';
+document.body.appendChild(blank_panel);
 
 var darkColors = document.getElementById('dark_colors');
 
