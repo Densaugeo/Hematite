@@ -376,10 +376,10 @@ Hematite.elements['HT-PANEL'] = function(element) {
   Object.defineProperty(element, 'headingText', {
     enumerable: true,
     get: function() {
-      return this.children[0].textContent;
+      return this.heading.textContent;
     },
     set: function(v) {
-      this.children[0].textContent = v;
+      this.heading.textContent = v;
       this._setTitle();
     }
   });
