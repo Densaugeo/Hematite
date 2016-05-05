@@ -1,6 +1,12 @@
 # Hematite.js
 
+Shared UI elements for my apps
+
 Dependencies: `Draggabilliy` 
+
+#### Properties
+
+`Object` **elements** -- Key-value store of custom elements. Keys are tagnames (in all caps), values are decorator functions. Each decorator accepts an HTMLElement as its argument and returns the same element
 
 #### Methods
 

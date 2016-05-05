@@ -1,30 +1,21 @@
 /**
  * @depends Draggabilliy
+ * @description Shared UI elements for my apps
  */
 var Draggabilly = require('draggabilly');
 
 var Hematite = exports;
 
+// @prop Object elements -- Key-value store of custom elements. Keys are tagnames (in all caps), values are decorator functions. Each decorator accepts an HTMLElement as its argument and returns the same element
+Hematite.elements = {};
+
 // @method HTMLElement createElement(String tagName) -- Extension of document.createElement for creating ht- elements
 Hematite.createElement = function(tagName) {
   var element = document.createElement(tagName);
+  var decorator = Hematite.elements[tagName.toUpperCase()];
   
-  switch(tagName) {
-    case 'ht-instant':
-      Hematite.instantButtonDecorator(element);
-      break;
-    case 'ht-toggle':
-      Hematite.toggleButtonDecorator(element);
-      break;
-    case 'ht-select':
-      Hematite.selectButtonDecorator(element);
-      break;
-    case 'ht-sidebar':
-      Hematite.sidebarDecorator(element);
-      break;
-    case 'ht-panel':
-      Hematite.panelDecorator(element);
-      break;
+  if(decorator) {
+    decorator(element);
   }
   
   return element;
@@ -55,7 +46,7 @@ var fE = Hematite.forgeElement;
  * @description Not an instantiable element. Only for other ht- elements to inherit from
  * @description Icons may be specified as either plain text or font-awesome text icon names
  */
-Hematite.buttonDecorator = function(element) {
+Hematite.elements['HT-BUTTON'] = function(element) {
   // @prop String className -- Defaults to 'ht-button fa'
   element.className = 'ht-button fa';
   
@@ -112,8 +103,8 @@ Hematite.buttonDecorator = function(element) {
  * @example instant.addEventListener('trigger', function() {console.log('Triggered!')});
  * @example document.body.appendChild(instant);
  */
-Hematite.instantButtonDecorator = function(element) {
-  Hematite.buttonDecorator(element);
+Hematite.elements['HT-INSTANT'] = function(element) {
+  Hematite.elements['HT-BUTTON'](element);
   
   // @event trigger {Event} -- Fired when an <ht-instant> is clicked
   element.addEventListener('click', function() {
@@ -134,8 +125,8 @@ Hematite.instantButtonDecorator = function(element) {
  * @example toggle.addEventListener('toggleoff', function() {console.log('Is now off')});
  * @example document.body.appendChild(toggle);
  */
-Hematite.toggleButtonDecorator = function(element) {
-  Hematite.buttonDecorator(element);
+Hematite.elements['HT-TOGGLE'] = function(element) {
+  Hematite.elements['HT-BUTTON'](element);
   
   // @prop String faClassAlt -- Sets alternative of .faClass to be used while button is toggled on
   var faClassAlt = '';
@@ -242,8 +233,8 @@ Hematite.toggleButtonDecorator = function(element) {
  * @example sidebar.appendChild(select2);
  * @example document.body.appendChild(sidebar);
  */
-Hematite.selectButtonDecorator = function(element) {
-  Hematite.buttonDecorator(element);
+Hematite.elements['HT-SELECT'] = function(element) {
+  Hematite.elements['HT-BUTTON'](element);
   
   // @event select {Event} -- Fired when an <ht-select> is selected
   // @event unselect {Event} -- Fired when an <ht-select> is unselected
@@ -275,7 +266,7 @@ Hematite.selectButtonDecorator = function(element) {
  * @example sidebar.appendChild(toggle);
  * @example document.body.appendChild(sidebar);
  */
-Hematite.sidebarDecorator = function(element) {
+Hematite.elements['HT-SIDEBAR'] = function(element) {
   // @prop String className -- Defaults to 'ht-tray'
   element.className = 'ht-tray';
   
@@ -371,7 +362,7 @@ Hematite.sidebarDecorator = function(element) {
  * @example ]);
  * @example document.body.appendChild(example_panel);
  */
-Hematite.panelDecorator = function(element) {
+Hematite.elements['HT-PANEL'] = function(element) {
   // @prop String className -- Defaults to 'ht-panel'
   element.className = 'ht-panel';
   
