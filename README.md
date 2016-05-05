@@ -1,7 +1,8 @@
 # Hematite
 
-UI for specialized SPAs
+Shared UI elements for my apps
 
+[![License: LGPL](https://img.shields.io/badge/license-LGPL-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0.en.html)
 [![Code Climate](https://codeclimate.com/github/Densaugeo/Hematite/badges/gpa.svg)](https://codeclimate.com/github/Densaugeo/Hematite)
 
 ## Installation
